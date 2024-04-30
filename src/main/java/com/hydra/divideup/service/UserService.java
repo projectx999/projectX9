@@ -23,7 +23,7 @@ public class UserService {
 
   public User createUser(UserDTO user) {
     String encodedPwd = passwordEncoder.encode(user.password());
-    User newUser = new User(user.name(), user.phone(), user.email(), encodedPwd);
+    User newUser = new User(user.name(), user.email(), user.phone(), encodedPwd);
     return userRepository.save(newUser);
   }
 
