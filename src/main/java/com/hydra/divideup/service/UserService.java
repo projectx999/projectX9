@@ -1,6 +1,7 @@
 package com.hydra.divideup.service;
 
 import com.hydra.divideup.entity.User;
+import com.hydra.divideup.exception.DivideUpError;
 import com.hydra.divideup.exception.RecordNotFoundException;
 import com.hydra.divideup.model.UserDTO;
 import com.hydra.divideup.repository.UserRepository;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
 
-  private static final String USER_NOT_FOUND = "User not found";
+
   private final UserRepository userRepository;
 
   private final BCryptPasswordEncoder passwordEncoder;
@@ -29,7 +30,7 @@ public class UserService {
 
   public User getUser(String id) {
     return userRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
+        .orElseThrow(() -> new RecordNotFoundException(DivideUpError.USER_NOT_FOUND));
   }
 
   public List<User> getUsers() {
@@ -38,7 +39,7 @@ public class UserService {
 
   public User updateUser(String id, User user) {
     User existingUser = userRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
+        .orElseThrow(() -> new RecordNotFoundException(DivideUpError.USER_NOT_FOUND));
     existingUser.setName(user.getName());
     existingUser.setEmail(user.getEmail());
     existingUser.setPhoneNumber(user.getPhoneNumber());
@@ -50,21 +51,21 @@ public class UserService {
 
   public User blockUser(String id) {
     User existingUser = userRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
+        .orElseThrow(() -> new RecordNotFoundException(DivideUpError.USER_NOT_FOUND));
     existingUser.setBlocked(true);
     return userRepository.save(existingUser);
   }
 
   public User unblockUser(String id) {
     User existingUser = userRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
+        .orElseThrow(() -> new RecordNotFoundException(DivideUpError.USER_NOT_FOUND));
     existingUser.setBlocked(false);
     return userRepository.save(existingUser);
   }
 
   public User deleteUser(String id) {
     User existingUser = userRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
+        .orElseThrow(() -> new RecordNotFoundException(DivideUpError.USER_NOT_FOUND));
     existingUser.setDeleted(true);
     return userRepository.save(existingUser);
   }

@@ -2,11 +2,11 @@ package com.hydra.divideup.exception;
 
 public class RecordNotFoundException extends DivideUpException {
 
-  public RecordNotFoundException(String message) {
-    super(message);
+  public RecordNotFoundException(DivideUpError error) {
+    super(error);
   }
 
-  public RecordNotFoundException(String message, Throwable cause) {
-    super(message, cause);
+  public RecordNotFoundException(DivideUpError error, Throwable cause) {
+    super(error, cause);
   }
 }

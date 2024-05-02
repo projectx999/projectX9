@@ -27,8 +27,10 @@ class UserRepositoryTest {
     user.setEmail("test@gmail.com");
     userRepository.save(user);
     User found = userRepository.findById(user.getId()).orElse(null);
-    assertThat(found).isNotNull();
-    assertThat(found.getName()).isEqualTo("Shan");
+    assertThat(found)
+            .isNotNull()
+            .returns("Shan",User::getName)
+            .returns("test@gmail.com",User::getEmail);
   }
 
 }
