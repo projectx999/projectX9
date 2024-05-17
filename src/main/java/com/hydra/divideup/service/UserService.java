@@ -63,7 +63,7 @@ public class UserService {
     return userRepository.save(existingUser);
   }
 
-  public User deleteUser(String id) {
+  public User deleteUser(String id){
     User existingUser = userRepository.findById(id)
         .orElseThrow(() -> new RecordNotFoundException(DivideUpError.USER_NOT_FOUND));
     existingUser.setDeleted(true);
