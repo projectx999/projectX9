@@ -76,21 +76,21 @@ public class UserService {
 
   public User blockUser(String id) {
     User existingUser = userRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(DivideUpError.USER_NOT_FOUND));
+        .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
     existingUser.setBlocked(true);
     return userRepository.save(existingUser);
   }
 
   public User unblockUser(String id) {
     User existingUser = userRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(DivideUpError.USER_NOT_FOUND));
+        .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
     existingUser.setBlocked(false);
     return userRepository.save(existingUser);
   }
 
   public User deleteUser(String id){
     User existingUser = userRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(DivideUpError.USER_NOT_FOUND));
+        .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
     existingUser.setDeleted(true);
     return userRepository.save(existingUser);
   }
