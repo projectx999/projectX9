@@ -14,7 +14,8 @@ public enum DivideUpError {
   GROUP_DELETE_UNSETTLE(2002, "Group is not settled for delete"),
 
   PAYMENT_VALIDATE_PAYEE(3001, "Group id and user id are required"),
-  PAYMENT_SPLIT_TYPE(3002, "Invalid split type");
+  PAYMENT_SPLIT_TYPE(3002, "Invalid split type"),
+  PAYMENT_AMOUNT(3003, "Payment amount should be greater than 0");
   private final int code;
   private final String message;
 
