@@ -26,7 +26,7 @@ public class Payment {
       private LocalDateTime date;
       private String category;
       private String note;
-      private boolean isSettled;
+      private boolean settled;
       @NotNull
       private SplitType splitType;
       private Map<String, Double> splitDetails;

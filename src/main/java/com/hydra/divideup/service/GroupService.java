@@ -6,7 +6,9 @@ import com.hydra.divideup.entity.Group;
 import com.hydra.divideup.exception.DivideUpError;
 import com.hydra.divideup.exception.IllegalOperationException;
 import com.hydra.divideup.exception.RecordNotFoundException;
+import com.hydra.divideup.repository.ExpenseRepository;
 import com.hydra.divideup.repository.GroupRepository;
+import com.hydra.divideup.repository.PaymentRepository;
 import java.util.List;
 import java.util.function.Supplier;
 import org.springframework.stereotype.Service;
@@ -16,11 +18,18 @@ public class GroupService {
 
   private final GroupRepository groupRepository;
 
-  private final Supplier<RecordNotFoundException> groupNotFoundSupplier =
-      () -> new RecordNotFoundException(DivideUpError.GROUP_NOT_FOUND);
+  private final ExpenseRepository expenseRepository;
 
-  public GroupService(GroupRepository groupRepository) {
+  private final PaymentRepository paymentRepository;
+
+  private final Supplier<RecordNotFoundException> groupNotFoundSupplier =
+      () -> new RecordNotFoundException(GROUP_NOT_FOUND);
+
+  public GroupService(GroupRepository groupRepository, ExpenseRepository expenseRepository,
+      PaymentRepository paymentRepository) {
     this.groupRepository = groupRepository;
+    this.expenseRepository = expenseRepository;
+    this.paymentRepository = paymentRepository;
   }
 
   public List<Group> getGroupsByUser(String userId) {
@@ -44,14 +53,21 @@ public class GroupService {
     return groupRepository.save(existingGroup);
   }
 
-  //todo validations of delete group
   public Group deleteGroup(String id) {
     Group group = groupRepository.findById(id)
         .orElseThrow(groupNotFoundSupplier);
-    if (!group.isSettled()) {
+    if (haveNoPendingNonSettledExpense(id)) {
       throw new IllegalOperationException(DivideUpError.GROUP_DELETE_UNSETTLE);
     }
     groupRepository.deleteById(id);
     return group;
   }
+
+  private boolean haveNoPendingNonSettledExpense(String groupId) {
+    var expenses = expenseRepository.findByGroupIdAndSettledTrue(groupId);
+    var payments = paymentRepository.findByGroupIdAndSettledTrue(groupId);
+    return !(expenses.isEmpty() && payments.isEmpty());
+  }
+
+
 }
