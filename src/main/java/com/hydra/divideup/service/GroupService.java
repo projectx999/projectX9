@@ -8,13 +8,16 @@ import com.hydra.divideup.exception.IllegalOperationException;
 import com.hydra.divideup.exception.RecordNotFoundException;
 import com.hydra.divideup.repository.GroupRepository;
 import java.util.List;
-import java.util.Objects;
+import java.util.function.Supplier;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GroupService {
 
   private final GroupRepository groupRepository;
+
+  private final Supplier<RecordNotFoundException> groupNotFoundSupplier =
+      () -> new RecordNotFoundException(DivideUpError.GROUP_NOT_FOUND);
 
   public GroupService(GroupRepository groupRepository) {
     this.groupRepository = groupRepository;
@@ -25,8 +28,8 @@ public class GroupService {
   }
 
   public Group getGroup(String id) {
-    return groupRepository.findById(id).orElseThrow(() -> new RecordNotFoundException(
-        GROUP_NOT_FOUND));
+    return groupRepository.findById(id)
+        .orElseThrow(groupNotFoundSupplier);
   }
 
   public Group createGroup(Group group) {
@@ -36,14 +39,15 @@ public class GroupService {
 
   public Group updateGroup(String groupId, Group group) {
     Group existingGroup = groupRepository.findById(groupId)
-        .orElseThrow(() -> new RecordNotFoundException(GROUP_NOT_FOUND));
+        .orElseThrow(groupNotFoundSupplier);
     group.setId(groupId);
     return groupRepository.save(existingGroup);
   }
 
+  //todo validations of delete group
   public Group deleteGroup(String id) {
     Group group = groupRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(GROUP_NOT_FOUND));
+        .orElseThrow(groupNotFoundSupplier);
     if (!group.isSettled()) {
       throw new IllegalOperationException(DivideUpError.GROUP_DELETE_UNSETTLE);
     }

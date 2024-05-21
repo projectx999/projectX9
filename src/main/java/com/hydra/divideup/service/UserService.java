@@ -9,6 +9,7 @@ import com.hydra.divideup.exception.RecordNotFoundException;
 import com.hydra.divideup.model.UserDTO;
 import com.hydra.divideup.repository.UserRepository;
 import java.util.List;
+import java.util.function.Supplier;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,8 @@ public class UserService {
   private final UserRepository userRepository;
 
   private final BCryptPasswordEncoder passwordEncoder;
+  private final Supplier<RecordNotFoundException> userNotFoundSupplier =
+      () -> new RecordNotFoundException(USER_NOT_FOUND);
 
   public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
     this.userRepository = userRepository;
@@ -38,7 +41,7 @@ public class UserService {
 
   public User getUser(String id) {
     return userRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
+        .orElseThrow(userNotFoundSupplier);
   }
 
   public List<User> getUsers() {
@@ -47,7 +50,7 @@ public class UserService {
 
   public User updateUser(String id, User user) {
     User existingUser = userRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
+        .orElseThrow(userNotFoundSupplier);
     List<User> byEmailOrPhoneNumber = userRepository.findByEmailOrPhoneNumber(user.getEmail(),
         user.getPhoneNumber());
     if (!byEmailOrPhoneNumber.isEmpty()) {
@@ -64,21 +67,22 @@ public class UserService {
 
   public User blockUser(String id) {
     User existingUser = userRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
+        .orElseThrow(userNotFoundSupplier);
     existingUser.setBlocked(true);
     return userRepository.save(existingUser);
   }
 
   public User unblockUser(String id) {
     User existingUser = userRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
+        .orElseThrow(userNotFoundSupplier);
     existingUser.setBlocked(false);
     return userRepository.save(existingUser);
   }
 
   public User deleteUser(String id) {
     User existingUser = userRepository.findById(id)
-        .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
+        .orElseThrow(userNotFoundSupplier);
+    // todo check if user is part of any group or other validations before deleting
     existingUser.setDeleted(true);
     return userRepository.save(existingUser);
   }
