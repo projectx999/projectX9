@@ -12,9 +12,11 @@ public class ExpenseCalculatorFactory {
   private final ShareExpenseCalculator shareExpenseCalculator;
   private final EqualExpenseCalculator equalExpenseCalculator;
 
-  public ExpenseCalculatorFactory(PercentageExpenseCalculator percentageExpenseCalculator,
+  public ExpenseCalculatorFactory(
+      PercentageExpenseCalculator percentageExpenseCalculator,
       UnEqualExpenseCalculator unEqualExpenseCalculator,
-      FullExpenseCalculator fullExpenseCalculator, ShareExpenseCalculator shareExpenseCalculator,
+      FullExpenseCalculator fullExpenseCalculator,
+      ShareExpenseCalculator shareExpenseCalculator,
       EqualExpenseCalculator equalExpenseCalculator) {
     this.percentageExpenseCalculator = percentageExpenseCalculator;
     this.unEqualExpenseCalculator = unEqualExpenseCalculator;
@@ -32,5 +34,4 @@ public class ExpenseCalculatorFactory {
       case SHARE -> shareExpenseCalculator;
     };
   }
-
 }

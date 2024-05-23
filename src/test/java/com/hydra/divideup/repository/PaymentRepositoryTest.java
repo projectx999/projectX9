@@ -14,8 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class PaymentRepositoryTest {
 
-  @Autowired
-  private PaymentRepository paymentRepository;
+  @Autowired private PaymentRepository paymentRepository;
 
   @BeforeEach
   public void setUp() {

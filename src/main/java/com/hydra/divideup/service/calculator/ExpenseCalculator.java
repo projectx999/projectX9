@@ -19,5 +19,4 @@ public abstract class ExpenseCalculator {
   protected abstract List<Expense> calculateExpensesForGroupExpense(Payment payment);
 
   protected abstract List<Expense> calculateExpensesForIndividualExpense(Payment payment);
-
 }

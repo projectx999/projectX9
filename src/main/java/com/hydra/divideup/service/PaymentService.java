@@ -47,13 +47,15 @@ public class PaymentService {
   }
 
   private void validateSplitDetails(Payment payment) {
-    Map<String, Double> splitDetails = ofNullable(payment.getSplitDetails())
-        .orElse(emptyMap());
+    Map<String, Double> splitDetails = ofNullable(payment.getSplitDetails()).orElse(emptyMap());
     // validate the split type
-    splitDetails.keySet().stream().filter(Objects::isNull).findAny()
-        .ifPresent(k -> {
-          throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
-        });
+    splitDetails.keySet().stream()
+        .filter(Objects::isNull)
+        .findAny()
+        .ifPresent(
+            k -> {
+              throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+            });
     if (payment.getSplitType() == SplitType.PERCENTAGE) {
       validateSplitPercentage(splitDetails);
     } else if (payment.getSplitType() == SplitType.SHARE) {
@@ -64,9 +66,7 @@ public class PaymentService {
   }
 
   private void validateSplitPercentage(Map<String, Double> splitDetails) {
-    var percentageSum = splitDetails.values().stream()
-        .mapToDouble(Double::doubleValue)
-        .sum();
+    var percentageSum = splitDetails.values().stream().mapToDouble(Double::doubleValue).sum();
     if (percentageSum != 100) {
       throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
     }
@@ -76,15 +76,14 @@ public class PaymentService {
     splitDetails.values().stream()
         .filter(v -> v < 0)
         .findAny()
-        .ifPresent(v -> {
-          throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
-        });
+        .ifPresent(
+            v -> {
+              throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+            });
   }
 
   private void validateSplitUnequal(double totalAmount, Map<String, Double> splitDetails) {
-    var amountSum = splitDetails.values().stream()
-        .mapToDouble(Double::doubleValue)
-        .sum();
+    var amountSum = splitDetails.values().stream().mapToDouble(Double::doubleValue).sum();
     if (totalAmount != amountSum) {
       throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
     }

@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
 
-
   private final UserRepository userRepository;
 
   private final BCryptPasswordEncoder passwordEncoder;
@@ -31,8 +30,8 @@ public class UserService {
   public User createUser(UserDTO user) {
     String encodedPwd = passwordEncoder.encode(user.password());
     User newUser = new User(user.name(), user.email(), user.phone(), encodedPwd);
-    List<User> byEmailOrPhoneNumber = userRepository.findByEmailOrPhoneNumber(user.email(),
-        user.phone());
+    List<User> byEmailOrPhoneNumber =
+        userRepository.findByEmailOrPhoneNumber(user.email(), user.phone());
     if (!byEmailOrPhoneNumber.isEmpty()) {
       throw new RecordAlreadyExistsException(USER_ALREADY_EXISTS);
     }
@@ -40,8 +39,7 @@ public class UserService {
   }
 
   public User getUser(String id) {
-    return userRepository.findById(id)
-        .orElseThrow(userNotFoundSupplier);
+    return userRepository.findById(id).orElseThrow(userNotFoundSupplier);
   }
 
   public List<User> getUsers() {
@@ -49,10 +47,9 @@ public class UserService {
   }
 
   public User updateUser(String id, User user) {
-    User existingUser = userRepository.findById(id)
-        .orElseThrow(userNotFoundSupplier);
-    List<User> byEmailOrPhoneNumber = userRepository.findByEmailOrPhoneNumber(user.getEmail(),
-        user.getPhoneNumber());
+    User existingUser = userRepository.findById(id).orElseThrow(userNotFoundSupplier);
+    List<User> byEmailOrPhoneNumber =
+        userRepository.findByEmailOrPhoneNumber(user.getEmail(), user.getPhoneNumber());
     if (!byEmailOrPhoneNumber.isEmpty()) {
       throw new RecordAlreadyExistsException(USER_ALREADY_EXISTS);
     }
@@ -66,22 +63,19 @@ public class UserService {
   }
 
   public User blockUser(String id) {
-    User existingUser = userRepository.findById(id)
-        .orElseThrow(userNotFoundSupplier);
+    User existingUser = userRepository.findById(id).orElseThrow(userNotFoundSupplier);
     existingUser.setBlocked(true);
     return userRepository.save(existingUser);
   }
 
   public User unblockUser(String id) {
-    User existingUser = userRepository.findById(id)
-        .orElseThrow(userNotFoundSupplier);
+    User existingUser = userRepository.findById(id).orElseThrow(userNotFoundSupplier);
     existingUser.setBlocked(false);
     return userRepository.save(existingUser);
   }
 
   public User deleteUser(String id) {
-    User existingUser = userRepository.findById(id)
-        .orElseThrow(userNotFoundSupplier);
+    User existingUser = userRepository.findById(id).orElseThrow(userNotFoundSupplier);
     // todo check if user is part of any group or other validations before deleting
     existingUser.setDeleted(true);
     return userRepository.save(existingUser);

@@ -24,15 +24,18 @@ public class EqualExpenseCalculator extends ExpenseCalculator {
 
   @Override
   protected List<Expense> calculateExpensesForGroupExpense(Payment payment) {
-    var group = groupRepository.findById(payment.getGroupId())
-        .orElseThrow(() -> new RecordNotFoundException(GROUP_NOT_FOUND));
+    var group =
+        groupRepository
+            .findById(payment.getGroupId())
+            .orElseThrow(() -> new RecordNotFoundException(GROUP_NOT_FOUND));
     var amount = BigDecimal.valueOf(payment.getAmount());
-    BigDecimal splitAmount = amount.divide(new BigDecimal(group.getMembers().size()),
-        RoundingMode.HALF_UP);
-    List<Expense> expenses = group.getMembers().stream()
-        .filter(member -> !member.equals(payment.getPaidBy()))
-        .map(member -> new Expense(payment, member, splitAmount.negate()))
-        .collect(Collectors.toCollection(ArrayList::new));
+    BigDecimal splitAmount =
+        amount.divide(new BigDecimal(group.getMembers().size()), RoundingMode.HALF_UP);
+    List<Expense> expenses =
+        group.getMembers().stream()
+            .filter(member -> !member.equals(payment.getPaidBy()))
+            .map(member -> new Expense(payment, member, splitAmount.negate()))
+            .collect(Collectors.toCollection(ArrayList::new));
     expenses.add(new Expense(payment, payment.getPaidBy(), amount.subtract(splitAmount)));
     return expenses;
   }
@@ -41,7 +44,8 @@ public class EqualExpenseCalculator extends ExpenseCalculator {
   protected List<Expense> calculateExpensesForIndividualExpense(Payment payment) {
     var amount = BigDecimal.valueOf(payment.getAmount());
     BigDecimal splitAmount = amount.divide(new BigDecimal("2"), RoundingMode.HALF_UP);
-    return List.of(new Expense(payment, payment.getUserId(), splitAmount.negate()),
+    return List.of(
+        new Expense(payment, payment.getUserId(), splitAmount.negate()),
         new Expense(payment, payment.getPaidBy(), amount.subtract(splitAmount)));
   }
 }
