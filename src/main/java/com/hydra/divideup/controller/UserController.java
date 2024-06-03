@@ -5,13 +5,7 @@ import com.hydra.divideup.model.UserDTO;
 import com.hydra.divideup.service.UserService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController()
 @RequestMapping("/user")
@@ -53,7 +47,7 @@ public class UserController {
     return ResponseEntity.ok(userService.unblockUser(id));
   }
 
-  @PutMapping("/{id}/delete")
+  @DeleteMapping("/{id}")
   public ResponseEntity<User> deleteUser(@PathVariable String id) {
     return ResponseEntity.ok(userService.deleteUser(id));
   }
