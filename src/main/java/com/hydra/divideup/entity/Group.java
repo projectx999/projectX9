@@ -16,8 +16,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class Group {
 
-  @Id private String id;
-  @NotNull private String groupName;
+  @Id
+  private String id;
+  private String groupName;
   private String groupDescription;
   @NotNull private Set<String> members;
 

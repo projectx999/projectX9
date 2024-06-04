@@ -1,5 +1,8 @@
 package com.hydra.divideup.exception;
 
+import lombok.Getter;
+
+@Getter
 public class DivideUpException extends RuntimeException {
   private final DivideUpError error;
 
