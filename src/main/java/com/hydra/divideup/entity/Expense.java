@@ -19,6 +19,6 @@ public class Expense {
     private LocalDateTime date;
     private String category;
     private String note;
-    private boolean isSettled;
+    private boolean settled;
     private String paymentId;
 }
