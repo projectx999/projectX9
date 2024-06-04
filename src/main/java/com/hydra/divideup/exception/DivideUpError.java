@@ -10,6 +10,7 @@ public enum DivideUpError {
   USER_ALREADY_EXISTS(1002, "User with emailId or phoneNumber already exists"),
   GROUP_NOT_FOUND(2001, "Group not found"),
   GROUP_DELETE_UNSETTLE(2002, "Group is not settled for delete");
+
   private final int code;
   private final String message;
   private final LocalDateTime timestamp;
