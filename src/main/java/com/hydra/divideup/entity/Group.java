@@ -18,7 +18,6 @@ public class Group {
 
   @Id
   private String id;
-  @NotNull
   private String groupName;
   private String groupDescription;
   @NotNull
