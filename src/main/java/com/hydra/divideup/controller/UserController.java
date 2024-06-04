@@ -4,11 +4,12 @@ import com.hydra.divideup.entity.User;
 import com.hydra.divideup.model.UserDTO;
 import com.hydra.divideup.service.UserService;
 import java.util.List;
+import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController()
-@RequestMapping("/user")
+@RequestMapping("api/v1/users")
 public class UserController {
 
   private final UserService userService;
@@ -23,7 +24,7 @@ public class UserController {
   }
 
   @PostMapping()
-  public ResponseEntity<User> createUser(@RequestBody UserDTO user) {
+  public ResponseEntity<User> createUser(@RequestBody @Valid UserDTO user) {
     return ResponseEntity.ok(userService.createUser(user));
   }
 

@@ -1,5 +1,10 @@
 package com.hydra.divideup.model;
 
-public record UserDTO(String name, String phone, String email, String password) {
+import javax.validation.constraints.NotNull;
+
+public record UserDTO(
+    @NotNull(message = "phone number must not be null") String phone,
+    @NotNull(message = "email must not be null") String email,
+    @NotNull(message = "password must not be null") String password) {
 
 }
