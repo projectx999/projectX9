@@ -61,6 +61,14 @@ public class PaymentService {
           .ifPresent(v -> {
             throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
           });
+    } else if (payment.getSplitType() == SplitType.UNEQUAL) {
+      var totalAmount = payment.getAmount();
+      var amountSum = splitDetails.values().stream()
+          .mapToDouble(Double::doubleValue)
+          .sum();
+      if (totalAmount != amountSum) {
+        throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+      }
     }
   }
 
