@@ -16,7 +16,6 @@ public enum DivideUpError {
   private final String message;
   private LocalDateTime timestamp;
 
-
   DivideUpError(int code, String message) {
     this.timestamp = LocalDateTime.now();
     this.code = code;
