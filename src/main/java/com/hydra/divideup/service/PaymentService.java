@@ -1,5 +1,6 @@
 package com.hydra.divideup.service;
 
+import static com.hydra.divideup.exception.DivideUpError.PAYMENT_AMOUNT;
 import static com.hydra.divideup.exception.DivideUpError.PAYMENT_SPLIT_TYPE;
 import static com.hydra.divideup.exception.DivideUpError.PAYMENT_VALIDATE_PAYEE;
 import static java.util.Collections.emptyMap;

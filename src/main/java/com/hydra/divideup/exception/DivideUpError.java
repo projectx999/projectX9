@@ -15,7 +15,8 @@ public enum DivideUpError {
   PAYMENT_SPLIT_TYPE(3002, "Invalid split type, user details should be present in split details"),
   PAYMENT_SPLIT_PERCENTAGE(3003, "Sum of split details should be 100 for percentage split type"),
   PAYMENT_SPLIT_SHARE(3004, "Share value should be positive"),
-  PAYMENT_SPLIT_UNEQUAL(3005, "Sum of split details should be equal to amount");
+  PAYMENT_SPLIT_UNEQUAL(3005, "Sum of split details should be equal to amount"),
+  PAYMENT_AMOUNT(3006, "Amount should be positive");
   private final int code;
   private final String message;
   private final LocalDateTime timestamp;
