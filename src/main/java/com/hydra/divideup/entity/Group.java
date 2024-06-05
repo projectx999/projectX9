@@ -16,21 +16,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class Group {
 
-  @Id
-  private String id;
+  @Id private String id;
   private String groupName;
   private String groupDescription;
-  @NotNull
-  private Set<String> members;
-  @CreatedBy
-  @NotNull
-  private String createdBy; //todo passing from UI will change to logged in user
-  @CreatedDate
-  private String createdTime;
-  @LastModifiedBy
-  private String updatedBy;
-  @LastModifiedDate
-  private String updatedTime;
+  @NotNull private Set<String> members;
+
+  @CreatedBy @NotNull
+  private String createdBy; // todo passing from UI will change to logged in user
+
+  @CreatedDate private String createdTime;
+  @LastModifiedBy private String updatedBy;
+  @LastModifiedDate private String updatedTime;
   private String type;
   private boolean isSettled;
 }

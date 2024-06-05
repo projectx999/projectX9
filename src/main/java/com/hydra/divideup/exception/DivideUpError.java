@@ -5,7 +5,6 @@ import lombok.Getter;
 
 @Getter
 public enum DivideUpError {
-
   USER_NOT_FOUND(1001, "User not found"),
   USER_ALREADY_EXISTS(1002, "User with emailId or phoneNumber already exists"),
   USER_EMAIL_EXISTS(1003, "User with emailId already exists"),
@@ -23,7 +22,7 @@ public enum DivideUpError {
 
   DivideUpError(int code, String message) {
     this.timestamp = LocalDateTime.now();
-    this.code=code;
+    this.code = code;
     this.message = message;
   }
 }

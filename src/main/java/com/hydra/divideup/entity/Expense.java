@@ -10,15 +10,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class Expense {
 
-    private String id;
-    private String userId;
-    private String groupId;
-    private String paidBy;
-    private String currency;
-    private double amount;
-    private LocalDateTime date;
-    private String category;
-    private String note;
-    private boolean settled;
-    private String paymentId;
+  private String id;
+  private String userId;
+  private String groupId;
+  private String paidBy;
+  private String currency;
+  private double amount;
+  private LocalDateTime date;
+  private String category;
+  private String note;
+  private boolean settled;
+  private String paymentId;
 }

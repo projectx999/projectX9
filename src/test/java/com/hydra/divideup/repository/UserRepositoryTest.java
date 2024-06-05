@@ -14,8 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class UserRepositoryTest {
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
   @BeforeEach
   public void setUp() {
@@ -48,24 +47,12 @@ class UserRepositoryTest {
     user2.setPhoneNumber("0987654321");
     userRepository.save(user2);
     List<User> found = userRepository.findByEmailOrPhoneNumber("test@gmail.com", "0987654321");
-    assertThat(found)
-        .isNotNull()
-        .hasSize(2)
-        .extracting(User::getName)
-        .contains("test1", "test2");
+    assertThat(found).isNotNull().hasSize(2).extracting(User::getName).contains("test1", "test2");
     List<User> found1 = userRepository.findByEmailOrPhoneNumber(null, null);
-    assertThat(found1)
-        .isNotNull()
-        .isEmpty();
+    assertThat(found1).isNotNull().isEmpty();
     List<User> found2 = userRepository.findByEmailOrPhoneNumber("test3@gmail.com", "0987654321");
-    assertThat(found2)
-        .isNotNull()
-        .hasSize(1)
-        .extracting(User::getName)
-        .contains("test2");
+    assertThat(found2).isNotNull().hasSize(1).extracting(User::getName).contains("test2");
     List<User> found3 = userRepository.findByEmailOrPhoneNumber("test3@gmail.com", "5784675678");
-    assertThat(found3)
-        .isNotNull()
-        .isEmpty();
+    assertThat(found3).isNotNull().isEmpty();
   }
 }

@@ -13,7 +13,5 @@ public class ExpenseService {
     this.expenseRepository = expenseRepository;
   }
 
-  public void createExpense(Payment payment) {
-
-  }
+  public void createExpense(Payment payment) {}
 }

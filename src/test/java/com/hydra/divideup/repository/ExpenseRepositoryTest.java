@@ -14,8 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class ExpenseRepositoryTest {
 
-  @Autowired
-  private ExpenseRepository expenseRepository;
+  @Autowired private ExpenseRepository expenseRepository;
 
   @BeforeEach
   public void setUp() {
@@ -54,5 +53,4 @@ class ExpenseRepositoryTest {
     // Then
     assertTrue(expenses.isEmpty());
   }
-
 }

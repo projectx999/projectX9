@@ -23,15 +23,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-  @Mock
-  private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-  @Mock
-  private BCryptPasswordEncoder passwordEncoder;
+  @Mock private BCryptPasswordEncoder passwordEncoder;
 
-
-  @InjectMocks
-  private UserService userService;
+  @InjectMocks private UserService userService;
 
   @Test
   void testCreateUser() {
@@ -40,8 +36,8 @@ class UserServiceTest {
     User user = new User(userDTO.email(), userDTO.phone(), "encodedPassword");
 
     // When
-    when(userRepository.findByEmailOrPhoneNumber(userDTO.email(), userDTO.phone())).thenReturn(
-        List.of());
+    when(userRepository.findByEmailOrPhoneNumber(userDTO.email(), userDTO.phone()))
+        .thenReturn(List.of());
     when(userRepository.save(any(User.class))).thenReturn(user);
     when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
 
@@ -54,12 +50,11 @@ class UserServiceTest {
   void testCreateUserAlreadyExists() {
     // Given
     UserDTO userDTO = new UserDTO("1243", "test@gmail.com", "1234567890");
-    User existingUser = new User( userDTO.email(), userDTO.phone(),
-        userDTO.password());
+    User existingUser = new User(userDTO.email(), userDTO.phone(), userDTO.password());
 
     // When
-    when(userRepository.findByEmailOrPhoneNumber(userDTO.email(), userDTO.phone())).thenReturn(
-        List.of(existingUser));
+    when(userRepository.findByEmailOrPhoneNumber(userDTO.email(), userDTO.phone()))
+        .thenReturn(List.of(existingUser));
 
     // Then
     assertThrows(RecordAlreadyExistsException.class, () -> userService.createUser(userDTO));
@@ -120,8 +115,8 @@ class UserServiceTest {
     updatedUser.setPhoneNumber("1234567891");
     // When
     when(userRepository.findById("testId")).thenReturn(Optional.of(user));
-    when(userRepository.findByEmailOrPhoneNumber(updatedUser.getEmail(),
-        updatedUser.getPhoneNumber()))
+    when(userRepository.findByEmailOrPhoneNumber(
+            updatedUser.getEmail(), updatedUser.getPhoneNumber()))
         .thenReturn(List.of());
     when(userRepository.save(user)).thenReturn(updatedUser);
     User savedUser = userService.updateUser("testId", updatedUser);
@@ -131,7 +126,7 @@ class UserServiceTest {
 
   @Test
   void testUpdateUserNotFound() {
-    //Given
+    // Given
     var user = new User();
     user.setId("testId");
     // When

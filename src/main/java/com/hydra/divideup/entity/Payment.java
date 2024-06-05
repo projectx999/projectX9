@@ -13,22 +13,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class Payment {
 
-      private String id;
-      private String userId;
-      private String groupId;
-      private String description;
-      @NotNull
-      private String paidBy;
-      @NotNull
-      private String currency;
-      @NotNull
-      private double amount;
-      private LocalDateTime date;
-      private String category;
-      private String note;
-      private boolean settled;
-      @NotNull
-      private SplitType splitType;
-      private Map<String, Double> splitDetails;
-
+  private String id;
+  private String userId;
+  private String groupId;
+  private String description;
+  @NotNull private String paidBy;
+  @NotNull private String currency;
+  @NotNull private double amount;
+  private LocalDateTime date;
+  private String category;
+  private String note;
+  private boolean settled;
+  @NotNull private SplitType splitType;
+  private Map<String, Double> splitDetails;
 }
