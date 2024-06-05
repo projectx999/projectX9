@@ -32,7 +32,7 @@ public class UserService {
   public User createUser(UserDTO user) {
     String encodedPwd = passwordEncoder.encode(user.password());
     User newUser = new User(user.email(), user.phone(), encodedPwd);
-    validateUser(newUser, new User());
+    validateCreateUser(newUser);
     return userRepository.save(newUser);
   }
 
@@ -48,7 +48,7 @@ public class UserService {
   public User updateUser(String id, User user) {
     User existingUser = userRepository.findById(id)
         .orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
-    validateUser(user, existingUser);
+    validateUpdateUser(user, existingUser);
     existingUser.setName(user.getName());
     existingUser.setEmail(user.getEmail());
     existingUser.setPhoneNumber(user.getPhoneNumber());
@@ -58,7 +58,7 @@ public class UserService {
     return userRepository.save(existingUser);
   }
 
-  void validateUser(User user, User existingUser) {
+  void validateUpdateUser(User user, User existingUser) {
     List<User> byEmailOrPhoneNumber = userRepository.findByEmailOrPhoneNumber(user.getEmail(),
         user.getPhoneNumber());
     if (!existingUser.getEmail().equalsIgnoreCase(user.getEmail())) {
@@ -77,6 +77,24 @@ public class UserService {
     }
   }
 
+  void validateCreateUser(User user) {
+    List<User> byEmailOrPhoneNumber = userRepository.findByEmailOrPhoneNumber(user.getEmail(),
+        user.getPhoneNumber());
+
+    byEmailOrPhoneNumber.stream().map(User::getEmail)
+        .filter(s -> s.equalsIgnoreCase(user.getEmail()))
+        .findAny().ifPresent(u -> {
+          throw new RecordAlreadyExistsException(USER_EMAIL_EXISTS);
+        });
+
+    byEmailOrPhoneNumber.stream().map(User::getPhoneNumber)
+        .filter(s -> s.equalsIgnoreCase(user.getPhoneNumber()))
+        .findAny().ifPresent(u -> {
+          throw new RecordAlreadyExistsException(USER_PHONE_EXISTS);
+        });
+
+  }
+
   public User blockUser(String id) {
     User existingUser = userRepository.findById(id)
         .orElseThrow(userNotFoundSupplier);
@@ -91,7 +109,7 @@ public class UserService {
     return userRepository.save(existingUser);
   }
 
-  public User deleteUser(String id){
+  public User deleteUser(String id) {
     User existingUser = userRepository.findById(id)
         .orElseThrow(userNotFoundSupplier);
     // todo check if user is part of any group or other validations before deleting

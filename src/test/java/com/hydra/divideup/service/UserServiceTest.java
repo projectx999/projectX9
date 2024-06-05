@@ -36,8 +36,8 @@ class UserServiceTest {
   @Test
   void testCreateUser() {
     // Given
-    UserDTO userDTO = new UserDTO("TestUser", "1243", "test@gmail.com", "1234567890");
-    User user = new User(userDTO.name(), userDTO.email(), userDTO.phone(), "encodedPassword");
+    UserDTO userDTO = new UserDTO("1243", "test@gmail.com", "1234567890");
+    User user = new User(userDTO.email(), userDTO.phone(), "encodedPassword");
 
     // When
     when(userRepository.findByEmailOrPhoneNumber(userDTO.email(), userDTO.phone())).thenReturn(
@@ -53,8 +53,8 @@ class UserServiceTest {
   @Test
   void testCreateUserAlreadyExists() {
     // Given
-    UserDTO userDTO = new UserDTO("TestUser", "1243", "test@gmail.com", "1234567890");
-    User existingUser = new User(userDTO.name(), userDTO.email(), userDTO.phone(),
+    UserDTO userDTO = new UserDTO("1243", "test@gmail.com", "1234567890");
+    User existingUser = new User( userDTO.email(), userDTO.phone(),
         userDTO.password());
 
     // When
@@ -92,9 +92,13 @@ class UserServiceTest {
     User user1 = new User();
     user1.setId("testId1");
     user1.setName("TestUser1");
+    user1.setEmail("testuser1@mail.com");
+    user1.setPhoneNumber("1234567890");
     User user2 = new User();
     user2.setId("testId2");
     user2.setName("TestUser2");
+    user2.setEmail("testuser2@mail.com");
+    user2.setPhoneNumber("1234567891");
     // When
     when(userRepository.findAll()).thenReturn(List.of(user1, user2));
     // Then
@@ -107,9 +111,13 @@ class UserServiceTest {
     User user = new User();
     user.setId("testId");
     user.setName("TestUser");
+    user.setEmail("testuser1@mail.com");
+    user.setPhoneNumber("1234567890");
     User updatedUser = new User();
     updatedUser.setId("testId");
     updatedUser.setName("UpdatedUser");
+    updatedUser.setEmail("updateduser@mail.com");
+    updatedUser.setPhoneNumber("1234567891");
     // When
     when(userRepository.findById("testId")).thenReturn(Optional.of(user));
     when(userRepository.findByEmailOrPhoneNumber(updatedUser.getEmail(),

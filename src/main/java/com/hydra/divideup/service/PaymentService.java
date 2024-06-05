@@ -1,6 +1,9 @@
 package com.hydra.divideup.service;
 
+import static com.hydra.divideup.exception.DivideUpError.PAYMENT_SPLIT_PERCENTAGE;
+import static com.hydra.divideup.exception.DivideUpError.PAYMENT_SPLIT_SHARE;
 import static com.hydra.divideup.exception.DivideUpError.PAYMENT_SPLIT_TYPE;
+import static com.hydra.divideup.exception.DivideUpError.PAYMENT_SPLIT_UNEQUAL;
 import static com.hydra.divideup.exception.DivideUpError.PAYMENT_VALIDATE_PAYEE;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.isNull;
@@ -48,27 +51,38 @@ public class PaymentService {
           throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
         });
     if (payment.getSplitType() == SplitType.PERCENTAGE) {
-      var percentageSum = splitDetails.values().stream()
-          .mapToDouble(Double::doubleValue)
-          .sum();
-      if (percentageSum != 100) {
-        throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
-      }
+      validatePercentageSplitType(splitDetails);
     } else if (payment.getSplitType() == SplitType.SHARE) {
-      splitDetails.values().stream()
-          .filter(v -> v < 0)
-          .findAny()
-          .ifPresent(v -> {
-            throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
-          });
+      validateShareSplitType(splitDetails);
     } else if (payment.getSplitType() == SplitType.UNEQUAL) {
-      var totalAmount = payment.getAmount();
-      var amountSum = splitDetails.values().stream()
-          .mapToDouble(Double::doubleValue)
-          .sum();
-      if (totalAmount != amountSum) {
-        throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
-      }
+      validateUnequalSplitType(splitDetails, payment.getAmount());
+    }
+  }
+
+  private void validatePercentageSplitType(Map<String, Double> splitDetails) {
+    var percentageSum = splitDetails.values().stream()
+        .mapToDouble(Double::doubleValue)
+        .sum();
+    if (percentageSum != 100) {
+      throw new IllegalOperationException(PAYMENT_SPLIT_PERCENTAGE);
+    }
+  }
+
+  private void validateShareSplitType(Map<String, Double> splitDetails) {
+    splitDetails.values().stream()
+        .filter(v -> v < 0)
+        .findAny()
+        .ifPresent(v -> {
+          throw new IllegalOperationException(PAYMENT_SPLIT_SHARE);
+        });
+  }
+
+  private void validateUnequalSplitType(Map<String, Double> splitDetails, double totalAmount) {
+    var amountSum = splitDetails.values().stream()
+        .mapToDouble(Double::doubleValue)
+        .sum();
+    if (totalAmount != amountSum) {
+      throw new IllegalOperationException(PAYMENT_SPLIT_UNEQUAL);
     }
   }
 
