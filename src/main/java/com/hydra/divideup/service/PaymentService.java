@@ -1,6 +1,5 @@
 package com.hydra.divideup.service;
 
-import static com.hydra.divideup.exception.DivideUpError.PAYMENT_AMOUNT;
 import static com.hydra.divideup.exception.DivideUpError.PAYMENT_SPLIT_TYPE;
 import static com.hydra.divideup.exception.DivideUpError.PAYMENT_VALIDATE_PAYEE;
 import static java.util.Collections.emptyMap;
@@ -40,6 +39,7 @@ public class PaymentService {
     if (isNull(payment.getGroupId()) || isNull(payment.getUserId())) {
       throw new IllegalOperationException(PAYMENT_VALIDATE_PAYEE);
     }
+    Map<String, Double> splitDetails = ofNullable(payment.getSplitDetails()).orElse(emptyMap());
     if (payment.getAmount() <= 0) {
       throw new IllegalOperationException(PAYMENT_AMOUNT);
     }
