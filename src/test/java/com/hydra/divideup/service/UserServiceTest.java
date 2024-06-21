@@ -37,10 +37,10 @@ class UserServiceTest {
   void testCreateUser() {
     // Given
     UserDTO userDTO = new UserDTO("1243", "test@gmail.com", "1234567890");
-    User user = new User(userDTO.email(), userDTO.phone(), "encodedPassword");
+    User user = new User(userDTO.getEmail(), userDTO.getPhone(), "encodedPassword");
 
     // When
-    when(userRepository.findByEmailOrPhoneNumber(userDTO.email(), userDTO.phone())).thenReturn(
+    when(userRepository.findByEmailOrPhoneNumber(userDTO.getEmail(), userDTO.getPhone())).thenReturn(
         List.of());
     when(userRepository.save(any(User.class))).thenReturn(user);
     when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
@@ -54,11 +54,11 @@ class UserServiceTest {
   void testCreateUserAlreadyExists() {
     // Given
     UserDTO userDTO = new UserDTO("1243", "test@gmail.com", "1234567890");
-    User existingUser = new User( userDTO.email(), userDTO.phone(),
-        userDTO.password());
+    User existingUser = new User(userDTO.getEmail(), userDTO.getPhone(),
+        userDTO.getPassword());
 
     // When
-    when(userRepository.findByEmailOrPhoneNumber(userDTO.email(), userDTO.phone())).thenReturn(
+    when(userRepository.findByEmailOrPhoneNumber(userDTO.getEmail(), userDTO.getPhone())).thenReturn(
         List.of(existingUser));
 
     // Then
@@ -113,26 +113,29 @@ class UserServiceTest {
     user.setName("TestUser");
     user.setEmail("testuser1@mail.com");
     user.setPhoneNumber("1234567890");
-    User updatedUser = new User();
-    updatedUser.setId("testId");
-    updatedUser.setName("UpdatedUser");
-    updatedUser.setEmail("updateduser@mail.com");
-    updatedUser.setPhoneNumber("1234567891");
+
+    UserDTO userDTO = new UserDTO();
+    userDTO.setId("testId");
+    userDTO.setName("UpdatedUser");
+    userDTO.setEmail("updateduser@mail.com");
+    userDTO.setPhone("1234567891");
     // When
     when(userRepository.findById("testId")).thenReturn(Optional.of(user));
-    when(userRepository.findByEmailOrPhoneNumber(updatedUser.getEmail(),
-        updatedUser.getPhoneNumber()))
+    when(userRepository.findByEmailOrPhoneNumber(userDTO.getEmail(),
+        userDTO.getPhone()))
         .thenReturn(List.of());
-    when(userRepository.save(user)).thenReturn(updatedUser);
-    User savedUser = userService.updateUser("testId", updatedUser);
+
+    user.setPhoneNumber(userDTO.getPhone());
+    when(userRepository.save(any(User.class))).thenReturn(user);
+    User savedUser = userService.updateUser("testId", userDTO);
     // Then
-    assertEquals(updatedUser, savedUser);
+    assertEquals(userDTO, savedUser);
   }
 
   @Test
   void testUpdateUserNotFound() {
     //Given
-    var user = new User();
+    var user = new UserDTO();
     user.setId("testId");
     // When
     when(userRepository.findById("testId")).thenReturn(Optional.empty());
@@ -143,14 +146,15 @@ class UserServiceTest {
   @Test
   void testUpdateUserEmailOrPhoneNumberAlreadyExists() {
     // Given
-    User user = new User();
+    UserDTO user = new UserDTO();
     user.setId("testId");
     user.setName("TestUser");
+
     User user1 = new User();
     user1.setId("testId1");
     // When
-    when(userRepository.findById("testId")).thenReturn(Optional.of(user));
-    when(userRepository.findByEmailOrPhoneNumber(user.getEmail(), user.getPhoneNumber()))
+    when(userRepository.findById("testId")).thenReturn(Optional.of(user1));
+    when(userRepository.findByEmailOrPhoneNumber(user.getEmail(), user.getPhone()))
         .thenReturn(List.of(user1));
     // Then
     assertThrows(Exception.class, () -> userService.updateUser("testId", user));

@@ -34,16 +34,16 @@ public class UserController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody @Valid User user) {
-    return ResponseEntity.ok(userService.updateUser(id, user));
+  public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody @Valid UserDTO userDTO) {
+    return ResponseEntity.ok(userService.updateUser(id, userDTO));
   }
 
-  @PutMapping("/{id}/block")
+  @PutMapping("/block/{id}")
   public ResponseEntity<User> blockUser(@PathVariable String id) {
     return ResponseEntity.ok(userService.blockUser(id));
   }
 
-  @PutMapping("/{id}/unblock")
+  @PutMapping("/unblock/{id}")
   public ResponseEntity<User> unblockUser(@PathVariable String id) {
     return ResponseEntity.ok(userService.unblockUser(id));
   }

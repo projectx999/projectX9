@@ -1,6 +1,9 @@
 package com.hydra.divideup.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hydra.divideup.entity.Group;
+import com.hydra.divideup.exception.DivideUpError;
+import com.hydra.divideup.exception.IllegalOperationException;
 import com.hydra.divideup.exception.RecordNotFoundException;
 import com.hydra.divideup.service.GroupService;
 import org.junit.jupiter.api.Test;
@@ -9,16 +12,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
+import static com.hydra.divideup.exception.DivideUpError.GROUP_DELETE_UNSETTLE;
 import static com.hydra.divideup.exception.DivideUpError.GROUP_NOT_FOUND;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
+import static com.hydra.divideup.exception.DivideUpError.USER_NOT_FOUND;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -31,10 +51,17 @@ public class GroupControllerTest {
     @MockBean
     private GroupService groupService;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
+    private final Supplier<RecordNotFoundException> groupNotFoundSupplier =
+            () -> new RecordNotFoundException(GROUP_NOT_FOUND);
+
     private final String groupsUrl = "/api/v1/groups";
 
     @Test
     void testGetGroup() throws Exception {
+        //given
         final String id = "123";
         Group group = new Group("Test Group", Set.of("user1", "user2"), "user1");
         group.setId(id);
@@ -57,17 +84,20 @@ public class GroupControllerTest {
         final String id = "234";
 
         //when
-        when(groupService.getGroup(id)).thenThrow(new RecordNotFoundException(GROUP_NOT_FOUND));
+        when(groupService.getGroup(id)).thenThrow(groupNotFoundSupplier.get());
 
         //then
         mockMvc.perform(get(groupsUrl + "/{id}", id))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.code", is(GROUP_NOT_FOUND.getCode())))
                 .andExpect(jsonPath("$.message", is(GROUP_NOT_FOUND.getMessage())));
+        //and
+        verify(groupService, times(1)).getGroup(id);
     }
 
-   @Test
+    @Test
     void testGetGroupsByUser() throws Exception {
+        //given
         final String id1 = "123";
         Group group1 = new Group("Test Group1", Set.of("user1", "user2"), "user1");
         group1.setId(id1);
@@ -85,6 +115,7 @@ public class GroupControllerTest {
         //then
         mockMvc.perform(get(groupsUrl + "/user/{userId}", "user1"))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 //groups>group1
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(id1)))
@@ -109,13 +140,14 @@ public class GroupControllerTest {
         //then
         mockMvc.perform(get(groupsUrl + "/user/{userId}", "user3"))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 //groups>group1
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id", is(id2)))
                 .andExpect(jsonPath("$[0].groupName", is(group2.getGroupName())))
                 .andExpect(jsonPath("$[0].members", containsInAnyOrder("user1", "user3")))
                 .andExpect(jsonPath("$[0].members", not(hasItem("user2"))));
-                //groups>group2
+        //groups>group2
 
         //and
         verify(groupService, times(1)).getGroupsByUser("user3");
@@ -128,15 +160,133 @@ public class GroupControllerTest {
         when(groupService.getGroupsByUser("user4")).thenReturn(Collections.emptyList());
 
         //then
-        mockMvc.perform(get(groupsUrl + "/user/{userId}","user4"))
+        mockMvc.perform(get(groupsUrl + "/user/{userId}", "user4"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$",hasSize(0)));
+                .andExpect(jsonPath("$", hasSize(0)));
         //and
-        verify(groupService,times(1)).getGroupsByUser("user4");
-
+        verify(groupService, times(1)).getGroupsByUser("user4");
     }
 
+
+    @Test
+    void testCreateGroup() throws Exception {
+        //given
+        final String groupId = "234";
+        final String createdBy = "created_user";
+        Group group = new Group("New Group", new HashSet<>(1), createdBy);
+        group.setId(groupId);
+        //Adding created user as member
+        group.getMembers().add(createdBy);
+
+        //when
+        when(groupService.createGroup(any(Group.class))).thenReturn(group);
+
+        //then
+        mockMvc.perform(post(groupsUrl)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(group)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is(groupId)))
+                .andExpect(jsonPath("$.groupName", is(group.getGroupName())))
+                .andExpect(jsonPath("$.createdBy", is(group.getCreatedBy())))
+                .andExpect(jsonPath("$.members", hasSize(1)))
+                .andExpect(jsonPath("$.members", containsInAnyOrder("created_user")));
+        //verify
+        verify(groupService, times(1)).createGroup(any(Group.class));
+    }
+
+    @Test
+    public void testUpdateGroup() throws Exception {
+        //given
+        final String groupId = "234";
+        Group updatedGroup = new Group("New Group", Set.of("user1", "user2"), "created_user");
+        updatedGroup.setId(groupId);
+
+        //when
+        when(groupService.updateGroup(eq(groupId), any(Group.class))).thenReturn(updatedGroup);
+
+        //then
+        mockMvc.perform(put(groupsUrl + "/{id}", groupId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedGroup)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is(groupId)))
+                .andExpect(jsonPath("$.groupName", is(updatedGroup.getGroupName())))
+                .andExpect(jsonPath("$.createdBy", is(updatedGroup.getCreatedBy())))
+                .andExpect(jsonPath("$.members", hasSize(2)))
+                .andExpect(jsonPath("$.members", containsInAnyOrder("user1", "user2")));
+        //verify
+        verify(groupService, times(1)).updateGroup(eq(groupId), any(Group.class));
+    }
+
+    @Test
+    public void testUpdateGroup_groupNotFound() throws Exception {
+        //given
+        final String groupId = "234";
+        Group updatedGroup = new Group("New Group", Set.of("user1", "user2"), "created_user");
+        updatedGroup.setId(groupId);
+
+        //when
+        when(groupService.updateGroup(eq(groupId), any(Group.class))).thenThrow(groupNotFoundSupplier.get());
+
+        //then
+        mockMvc.perform(put(groupsUrl + "/{id}", groupId)
+                        .content(objectMapper.writeValueAsString(updatedGroup))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError())
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code", is(GROUP_NOT_FOUND.getCode())))
+                .andExpect(jsonPath("$.message", is(GROUP_NOT_FOUND.getMessage())));
+
+        //verify
+        verify(groupService, times(1)).updateGroup(eq(groupId), any(Group.class));
+    }
+
+    @Test
+    public void testDeleteGroup() throws Exception {
+        //given
+        final String groupId = "1";
+        Group deletedGroup = new Group("Deleted Group",Set.of("user1", "user2"), "created_user");
+        deletedGroup.setId(groupId);
+
+        //when
+        Mockito.when(groupService.deleteGroup(groupId)).thenReturn(deletedGroup);
+
+        //then
+        mockMvc.perform(delete(groupsUrl+"/{id}", groupId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(deletedGroup)));
+
+        //verify
+        verify(groupService, Mockito.times(1)).deleteGroup(groupId);
+    }
+
+    @Test
+    public void testDeleteGroup_NotSettledThrowException() throws Exception {
+        //given
+        final String groupId = "1";
+        Group deletedGroup = new Group("Deleted Group",Set.of("user1", "user2"), "created_user");
+        deletedGroup.setId(groupId);
+
+        //when
+        Mockito.when(groupService.deleteGroup(groupId)).thenThrow(new IllegalOperationException(GROUP_DELETE_UNSETTLE));
+
+        //then
+        mockMvc.perform(delete(groupsUrl+"/{id}", groupId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code", is(GROUP_DELETE_UNSETTLE.getCode())))
+                .andExpect(jsonPath("$.message", is(GROUP_DELETE_UNSETTLE.getMessage())));
+
+        //verify
+        verify(groupService, Mockito.times(1)).deleteGroup(groupId);
+    }
 }
+
 
 
 

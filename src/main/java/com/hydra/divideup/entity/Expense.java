@@ -1,6 +1,8 @@
 package com.hydra.divideup.entity;
 
 import java.time.LocalDateTime;
+
+import com.hydra.divideup.enums.Currency;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,7 +16,7 @@ public class Expense {
     private String userId;
     private String groupId;
     private String paidBy;
-    private String currency;
+    private Currency currency;
     private double amount;
     private LocalDateTime date;
     private String category;
