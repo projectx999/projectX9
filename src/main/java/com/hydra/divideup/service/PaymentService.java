@@ -42,14 +42,16 @@ public class PaymentService {
     if (isNull(payment.getGroupId()) || isNull(payment.getUserId())) {
       throw new IllegalOperationException(PAYMENT_VALIDATE_PAYEE);
     }
-    Map<String, Double> splitDetails = ofNullable(payment.getSplitDetails())
-        .orElse(emptyMap());
+    Map<String, Double> splitDetails = ofNullable(payment.getSplitDetails()).orElse(emptyMap());
 
     // validate the split type
-    splitDetails.keySet().stream().filter(Objects::isNull).findAny()
-        .ifPresent(k -> {
-          throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
-        });
+    splitDetails.keySet().stream()
+        .filter(Objects::isNull)
+        .findAny()
+        .ifPresent(
+            k -> {
+              throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+            });
     if (payment.getSplitType() == SplitType.PERCENTAGE) {
       validatePercentageSplitType(splitDetails);
     } else if (payment.getSplitType() == SplitType.SHARE) {
@@ -60,9 +62,7 @@ public class PaymentService {
   }
 
   private void validatePercentageSplitType(Map<String, Double> splitDetails) {
-    var percentageSum = splitDetails.values().stream()
-        .mapToDouble(Double::doubleValue)
-        .sum();
+    var percentageSum = splitDetails.values().stream().mapToDouble(Double::doubleValue).sum();
     if (percentageSum != 100) {
       throw new IllegalOperationException(PAYMENT_SPLIT_PERCENTAGE);
     }
@@ -72,18 +72,16 @@ public class PaymentService {
     splitDetails.values().stream()
         .filter(v -> v < 0)
         .findAny()
-        .ifPresent(v -> {
-          throw new IllegalOperationException(PAYMENT_SPLIT_SHARE);
-        });
+        .ifPresent(
+            v -> {
+              throw new IllegalOperationException(PAYMENT_SPLIT_SHARE);
+            });
   }
 
   private void validateUnequalSplitType(Map<String, Double> splitDetails, double totalAmount) {
-    var amountSum = splitDetails.values().stream()
-        .mapToDouble(Double::doubleValue)
-        .sum();
+    var amountSum = splitDetails.values().stream().mapToDouble(Double::doubleValue).sum();
     if (totalAmount != amountSum) {
       throw new IllegalOperationException(PAYMENT_SPLIT_UNEQUAL);
     }
   }
-
 }

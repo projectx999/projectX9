@@ -24,17 +24,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class GroupServiceTest {
 
-  @Mock
-  private GroupRepository groupRepository;
+  @Mock private GroupRepository groupRepository;
 
-  @Mock
-  private ExpenseRepository expenseRepository;
+  @Mock private ExpenseRepository expenseRepository;
 
-  @Mock
-  private PaymentRepository paymentRepository;
+  @Mock private PaymentRepository paymentRepository;
 
-  @InjectMocks
-  private GroupService groupService;
+  @InjectMocks private GroupService groupService;
 
   @Test
   void testGetGroupsByUser() {

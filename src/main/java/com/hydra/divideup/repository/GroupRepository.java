@@ -9,5 +9,4 @@ import org.springframework.stereotype.Repository;
 public interface GroupRepository extends MongoRepository<Group, String> {
 
   List<Group> findByMembersContains(String member);
-
 }
