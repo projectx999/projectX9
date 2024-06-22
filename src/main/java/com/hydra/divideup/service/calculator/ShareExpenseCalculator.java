@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ShareExpenseCalculator extends ExpenseCalculator {
+public final class ShareExpenseCalculator extends ExpenseCalculator {
 
   @Override
   protected List<Expense> calculateExpensesForGroupExpense(Payment payment) {

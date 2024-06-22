@@ -1,10 +1,12 @@
 package com.hydra.divideup.service.calculator;
 
 import com.hydra.divideup.enums.SplitType;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ExpenseCalculatorFactory {
+@AllArgsConstructor
+public final class ExpenseCalculatorFactory {
 
   private final PercentageExpenseCalculator percentageExpenseCalculator;
   private final UnEqualExpenseCalculator unEqualExpenseCalculator;
@@ -12,20 +14,7 @@ public class ExpenseCalculatorFactory {
   private final ShareExpenseCalculator shareExpenseCalculator;
   private final EqualExpenseCalculator equalExpenseCalculator;
 
-  public ExpenseCalculatorFactory(
-      PercentageExpenseCalculator percentageExpenseCalculator,
-      UnEqualExpenseCalculator unEqualExpenseCalculator,
-      FullExpenseCalculator fullExpenseCalculator,
-      ShareExpenseCalculator shareExpenseCalculator,
-      EqualExpenseCalculator equalExpenseCalculator) {
-    this.percentageExpenseCalculator = percentageExpenseCalculator;
-    this.unEqualExpenseCalculator = unEqualExpenseCalculator;
-    this.fullExpenseCalculator = fullExpenseCalculator;
-    this.shareExpenseCalculator = shareExpenseCalculator;
-    this.equalExpenseCalculator = equalExpenseCalculator;
-  }
-
-  public ExpenseCalculator getExpenseCalculator(SplitType splitType) {
+  public ExpenseCalculator getExpenseCalculator(final SplitType splitType) {
     return switch (splitType) {
       case PERCENTAGE -> percentageExpenseCalculator;
       case UNEQUAL -> unEqualExpenseCalculator;

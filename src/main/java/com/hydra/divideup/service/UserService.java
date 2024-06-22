@@ -10,6 +10,7 @@ import com.hydra.divideup.exception.RecordNotFoundException;
 import com.hydra.divideup.model.UserDTO;
 import com.hydra.divideup.repository.UserRepository;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,10 @@ public class UserService {
 
   public List<User> getUsers() {
     return userRepository.findAll();
+  }
+
+  public List<User> getUsers(Set<String> ids) {
+    return userRepository.findAllById(ids);
   }
 
   public User updateUser(String id, User user) {
