@@ -14,31 +14,27 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class Payment {
 
-      private String id;
-      private String userId;
-      private String groupId;
-      private String description;
-      @NotNull
-      private String paidBy;
-      @NotNull
-      private Currency currency;
-      @NotNull
-      private double amount;
-      private LocalDateTime date;
-      private String category;
-      private String note;
-      private boolean settled;
-      @NotNull
-      private SplitType splitType;
-      private Map<String, Double> splitDetails;
+  private String id;
+  private String userId;
+  private String groupId;
+  private String description;
+  @NotNull private String paidBy;
+  @NotNull private Currency currency;
+  @NotNull private double amount;
+  private LocalDateTime date;
+  private String category;
+  private String note;
+  private boolean settled;
+  @NotNull private SplitType splitType;
+  private Map<String, Double> splitDetails;
 
-    public Payment() {}
+  public Payment() {}
 
-    public Payment(String paidBy, Currency currency,double amount, SplitType splitType) {
-            this.paidBy = paidBy;
-            this.category = category;
-            this.splitType = splitType;
-            this.currency = currency;
-            this.amount = amount;
-      }
+  public Payment(String paidBy, Currency currency, double amount, SplitType splitType) {
+    this.paidBy = paidBy;
+    this.category = category;
+    this.splitType = splitType;
+    this.currency = currency;
+    this.amount = amount;
+  }
 }

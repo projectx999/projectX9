@@ -1,5 +1,6 @@
 package com.hydra.divideup.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,25 +24,21 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-  @Mock
-  private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-  @Mock
-  private BCryptPasswordEncoder passwordEncoder;
+  @Mock private BCryptPasswordEncoder passwordEncoder;
 
-
-  @InjectMocks
-  private UserService userService;
+  @InjectMocks private UserService userService;
 
   @Test
   void testCreateUser() {
     // Given
     UserDTO userDTO = new UserDTO("1243", "test@gmail.com", "1234567890");
-    User user = new User(userDTO.getEmail(), userDTO.getPhone(), "encodedPassword");
+    User user = new User(userDTO.getEmail(), userDTO.getPhoneNumber(), "encodedPassword");
 
     // When
-    when(userRepository.findByEmailOrPhoneNumber(userDTO.getEmail(), userDTO.getPhone())).thenReturn(
-        List.of());
+    when(userRepository.findByEmailOrPhoneNumber(userDTO.getEmail(), userDTO.getPhoneNumber()))
+        .thenReturn(List.of());
     when(userRepository.save(any(User.class))).thenReturn(user);
     when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
 
@@ -54,12 +51,12 @@ class UserServiceTest {
   void testCreateUserAlreadyExists() {
     // Given
     UserDTO userDTO = new UserDTO("1243", "test@gmail.com", "1234567890");
-    User existingUser = new User(userDTO.getEmail(), userDTO.getPhone(),
-        userDTO.getPassword());
+    User existingUser =
+        new User(userDTO.getEmail(), userDTO.getPhoneNumber(), userDTO.getPassword());
 
     // When
-    when(userRepository.findByEmailOrPhoneNumber(userDTO.getEmail(), userDTO.getPhone())).thenReturn(
-        List.of(existingUser));
+    when(userRepository.findByEmailOrPhoneNumber(userDTO.getEmail(), userDTO.getPhoneNumber()))
+        .thenReturn(List.of(existingUser));
 
     // Then
     assertThrows(RecordAlreadyExistsException.class, () -> userService.createUser(userDTO));
@@ -118,23 +115,22 @@ class UserServiceTest {
     userDTO.setId("testId");
     userDTO.setName("UpdatedUser");
     userDTO.setEmail("updateduser@mail.com");
-    userDTO.setPhone("1234567891");
+    userDTO.setPhoneNumber("1234567891");
     // When
     when(userRepository.findById("testId")).thenReturn(Optional.of(user));
-    when(userRepository.findByEmailOrPhoneNumber(userDTO.getEmail(),
-        userDTO.getPhone()))
+    when(userRepository.findByEmailOrPhoneNumber(userDTO.getEmail(), userDTO.getPhoneNumber()))
         .thenReturn(List.of());
 
-    user.setPhoneNumber(userDTO.getPhone());
+    user.setPhoneNumber(userDTO.getPhoneNumber());
     when(userRepository.save(any(User.class))).thenReturn(user);
     User savedUser = userService.updateUser("testId", userDTO);
     // Then
-    assertEquals(userDTO, savedUser);
+    assertThat(userDTO).usingRecursiveComparison().isEqualTo(savedUser);
   }
 
   @Test
   void testUpdateUserNotFound() {
-    //Given
+    // Given
     var user = new UserDTO();
     user.setId("testId");
     // When
@@ -154,7 +150,7 @@ class UserServiceTest {
     user1.setId("testId1");
     // When
     when(userRepository.findById("testId")).thenReturn(Optional.of(user1));
-    when(userRepository.findByEmailOrPhoneNumber(user.getEmail(), user.getPhone()))
+    when(userRepository.findByEmailOrPhoneNumber(user.getEmail(), user.getPhoneNumber()))
         .thenReturn(List.of(user1));
     // Then
     assertThrows(Exception.class, () -> userService.updateUser("testId", user));

@@ -4,14 +4,14 @@ import lombok.Getter;
 
 @Getter
 public enum Currency {
-    //Alphabetical order
-    INR("Indian Rupee"),
-    SEK("Swedish Krona"),
-    USD("US Dollar");
+  // Alphabetical order
+  INR("Indian Rupee"),
+  SEK("Swedish Krona"),
+  USD("US Dollar");
 
-    private String name;
+  private String name;
 
-    Currency(String name) {
-        this.name = name;
-    }
+  Currency(String name) {
+    this.name = name;
+  }
 }

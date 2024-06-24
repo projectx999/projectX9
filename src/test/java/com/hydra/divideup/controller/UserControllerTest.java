@@ -1,28 +1,5 @@
 package com.hydra.divideup.controller;
 
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hydra.divideup.entity.Group;
-import com.hydra.divideup.entity.User;
-import com.hydra.divideup.exception.RecordAlreadyExistsException;
-import com.hydra.divideup.exception.RecordNotFoundException;
-import com.hydra.divideup.model.UserDTO;
-import com.hydra.divideup.service.UserService;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
-
-import static com.hydra.divideup.exception.DivideUpError.GROUP_NOT_FOUND;
 import static com.hydra.divideup.exception.DivideUpError.USER_EMAIL_EXISTS;
 import static com.hydra.divideup.exception.DivideUpError.USER_NOT_FOUND;
 import static com.hydra.divideup.exception.DivideUpError.USER_PHONE_EXISTS;
@@ -41,349 +18,373 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = UserController.class, excludeAutoConfiguration = {SecurityAutoConfiguration.class})
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hydra.divideup.entity.User;
+import com.hydra.divideup.exception.RecordAlreadyExistsException;
+import com.hydra.divideup.exception.RecordNotFoundException;
+import com.hydra.divideup.model.UserDTO;
+import com.hydra.divideup.service.UserService;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+@WebMvcTest(
+    controllers = UserController.class,
+    excludeAutoConfiguration = {SecurityAutoConfiguration.class})
 class UserControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private UserService userService;
+  @MockBean private UserService userService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-    private final Supplier<RecordNotFoundException> userNotFoundSupplier =
-            () -> new RecordNotFoundException(USER_NOT_FOUND);
+  private final Supplier<RecordNotFoundException> userNotFoundSupplier =
+      () -> new RecordNotFoundException(USER_NOT_FOUND);
 
-    private final String usersUrl = "/api/v1/users";
+  private final String usersUrl = "/api/v1/users";
 
-    @Test
-    void tetGetUser() throws Exception {
-        //given
-        final String id = "123";
-        User user = new User("manji@gmail", "123456789", "pass@123");
-        user.setId(id);
+  @Test
+  void tetGetUser() throws Exception {
+    // given
+    final String id = "123";
+    User user = new User("manji@gmail", "123456789", "pass@123");
+    user.setId(id);
 
-        //when
-        when(userService.getUser(id)).thenReturn(user);
+    // when
+    when(userService.getUser(id)).thenReturn(user);
 
-        //then
-        mockMvc.perform(get(usersUrl + "/{id}", id))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(id)))
-                .andExpect(jsonPath("$.email", is(user.getEmail())))
-                .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
-                //make sure password not revealed outside
-                .andExpect(jsonPath("$.password").doesNotExist());
+    // then
+    mockMvc
+        .perform(get(usersUrl + "/{id}", id))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id", is(id)))
+        .andExpect(jsonPath("$.email", is(user.getEmail())))
+        .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
+        // make sure password not revealed outside
+        .andExpect(jsonPath("$.password").doesNotExist());
 
-        //and
-        verify(userService, times(1)).getUser(id);
-    }
+    // and
+    verify(userService, times(1)).getUser(id);
+  }
 
-    @Test
-    void testGetUser_NotFound() throws Exception {
-        //given
-        final String id = "234";
+  @Test
+  void testGetUser_NotFound() throws Exception {
+    // given
+    final String id = "234";
 
-        //when
-        when(userService.getUser(id)).thenThrow(new RecordNotFoundException(USER_NOT_FOUND));
+    // when
+    when(userService.getUser(id)).thenThrow(new RecordNotFoundException(USER_NOT_FOUND));
 
-        //then
-        mockMvc.perform(get(usersUrl + "/{id}", id))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
-                .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
-        //And
-        verify(userService, times(1)).getUser(id);
+    // then
+    mockMvc
+        .perform(get(usersUrl + "/{id}", id))
+        .andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
+        .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
+    // And
+    verify(userService, times(1)).getUser(id);
+  }
 
-    }
+  @Test
+  void testGetUsers() throws Exception {
+    // given
+    User user1 = new User("manji@gmail", "123456789", "pass@123");
+    user1.setId("123");
 
-    @Test
-    void testGetUsers() throws Exception {
-        //given
-        User user1 = new User("manji@gmail", "123456789", "pass@123");
-        user1.setId("123");
+    User user2 = new User("ranji@gmail", "678912345", "check@123");
+    user2.setId("234");
 
-        User user2 = new User("ranji@gmail", "678912345", "check@123");
-        user2.setId("234");
+    List<User> users = List.of(user1, user2);
 
-        List<User> users = List.of(user1, user2);
+    // when
+    when(userService.getUsers()).thenReturn(users);
 
-        //when
-        when(userService.getUsers()).thenReturn(users);
+    // then
+    mockMvc
+        .perform(get(usersUrl))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(2)))
+        // user1
+        .andExpect(jsonPath("$[0].id", is(user1.getId())))
+        .andExpect(jsonPath("$[0].email", is(user1.getEmail())))
+        .andExpect(jsonPath("$[0].phoneNumber", is(user1.getPhoneNumber())))
+        // make sure password not revealed outside
+        .andExpect(jsonPath("$[0].password").doesNotExist())
+        // user2
+        .andExpect(jsonPath("$[1].id", is(user2.getId())))
+        .andExpect(jsonPath("$[1].email", is(user2.getEmail())))
+        .andExpect(jsonPath("$[1].phoneNumber", is(user2.getPhoneNumber())))
+        // make sure password not revealed outside
+        .andExpect(jsonPath("$[1].password").doesNotExist());
+    // and
+    verify(userService, times(1)).getUsers();
+  }
 
-        //then
-        mockMvc.perform(get(usersUrl))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                //user1
-                .andExpect(jsonPath("$[0].id", is(user1.getId()))).andExpect(jsonPath("$[0].email", is(user1.getEmail()))).andExpect(jsonPath("$[0].phoneNumber", is(user1.getPhoneNumber())))
-                //make sure password not revealed outside
-                .andExpect(jsonPath("$[0].password").doesNotExist())
-                //user2
-                .andExpect(jsonPath("$[1].id", is(user2.getId()))).andExpect(jsonPath("$[1].email", is(user2.getEmail()))).andExpect(jsonPath("$[1].phoneNumber", is(user2.getPhoneNumber())))
-                //make sure password not revealed outside
-                .andExpect(jsonPath("$[1].password").doesNotExist());
-        //and
-        verify(userService, times(1)).getUsers();
+  @Test
+  void testGetUsers_EmptyList() throws Exception {
+    // when
+    when(userService.getUsers()).thenReturn(Collections.emptyList());
+    // then
+    mockMvc.perform(get(usersUrl)).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
+  }
 
-    }
+  @Test
+  void testCreateUser() throws Exception {
+    // given
+    UserDTO userDTO = new UserDTO("manji@gmail", "123456789", "pass@123");
 
-    @Test
-    void testGetUsers_EmptyList() throws Exception {
-        //when
-        when(userService.getUsers()).thenReturn(Collections.emptyList());
-        //then
-        mockMvc.perform(get(usersUrl))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+    final String id = "123";
+    User user = new User("manji@gmail", "123456789", "pass@123");
+    user.setId(id);
 
-    }
+    // when
+    when(userService.createUser(any(UserDTO.class))).thenReturn(user);
+    // then
+    mockMvc
+        .perform(
+            post(usersUrl)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDTO)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id", is(id)))
+        .andExpect(jsonPath("$.email", is(user.getEmail())))
+        .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
+        // make sure password not revealed outside
+        .andExpect(jsonPath("$.password").doesNotExist());
+    // and
+    verify(userService, times(1)).createUser(any(UserDTO.class));
+  }
 
-    @Test
-    void testCreateUser() throws Exception {
-        //given
-        UserDTO userDTO = new UserDTO("manji@gmail", "123456789", "pass@123");
+  @Test
+  void testCreateUser_ExistingEmail() throws Exception {
+    // given
+    UserDTO existingUser = new UserDTO();
+    existingUser.setEmail("existing@example.com");
 
-        final String id = "123";
-        User user = new User("manji@gmail", "123456789", "pass@123");
-        user.setId(id);
+    // when
+    when(userService.createUser(any(UserDTO.class)))
+        .thenThrow(new RecordAlreadyExistsException(USER_EMAIL_EXISTS));
 
-        //when
-        when(userService.createUser(any(UserDTO.class))).thenReturn(user);
-        //then
-        mockMvc.perform(post(usersUrl)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(id)))
-                .andExpect(jsonPath("$.email", is(user.getEmail())))
-                .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
-                //make sure password not revealed outside
-                .andExpect(jsonPath("$.password").doesNotExist());
-        //and
-        verify(userService, times(1)).createUser(any(UserDTO.class));
-    }
+    // then
+    mockMvc
+        .perform(
+            post(usersUrl)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(existingUser)))
+        .andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.code", is(USER_EMAIL_EXISTS.getCode())))
+        .andExpect(jsonPath("$.message", is(USER_EMAIL_EXISTS.getMessage())));
+    // and
+    verify(userService, times(1)).createUser(any(UserDTO.class));
+  }
 
-    @Test
-    void testCreateUser_ExistingEmail() throws Exception {
-        // given
-        UserDTO existingUser = new UserDTO();
-        existingUser.setEmail("existing@example.com");
+  @Test
+  void testCreateUser_ExistingPhoneNumber() throws Exception {
+    // given
+    UserDTO existingUser = new UserDTO();
+    existingUser.setPhoneNumber("123456789");
 
-        //when
-        when(userService.createUser(any(UserDTO.class))).thenThrow(new RecordAlreadyExistsException(USER_EMAIL_EXISTS));
+    // when
+    when(userService.createUser(any(UserDTO.class)))
+        .thenThrow(new RecordAlreadyExistsException(USER_PHONE_EXISTS));
 
-        //then
-        mockMvc.perform(post(usersUrl)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(existingUser)))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code", is(USER_EMAIL_EXISTS.getCode())))
-                .andExpect(jsonPath("$.message", is(USER_EMAIL_EXISTS.getMessage())));
-        //and
-        verify(userService, times(1)).createUser(any(UserDTO.class));
+    // then
+    mockMvc
+        .perform(
+            post(usersUrl)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(existingUser)))
+        .andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.code", is(USER_PHONE_EXISTS.getCode())))
+        .andExpect(jsonPath("$.message", is(USER_PHONE_EXISTS.getMessage())));
+    // and
+    verify(userService, times(1)).createUser(any(UserDTO.class));
+  }
 
-    }
+  // @Disabled
+  @Test
+  void testUpdateUser() throws Exception {
+    // given
+    final String id = "123";
+    UserDTO userDTO = new UserDTO();
+    userDTO.setId(id);
+    userDTO.setEmail("manji@gmail.com");
 
-    @Test
-    void testCreateUser_ExistingPhoneNumber() throws Exception {
-        // given
-        UserDTO existingUser = new UserDTO();
-        existingUser.setPhone("123456789");
+    User updatedUser = new User();
+    updatedUser.setId("123");
+    updatedUser.setPhoneNumber("987654321");
+    updatedUser.setEmail("updated@example.com");
 
-        // when
-        when(userService.createUser(any(UserDTO.class))).thenThrow(new RecordAlreadyExistsException(USER_PHONE_EXISTS));
+    // When
+    when(userService.updateUser(eq(id), any(UserDTO.class))).thenReturn(updatedUser);
 
-        //then
-        mockMvc.perform(post(usersUrl)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(existingUser)))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code", is(USER_PHONE_EXISTS.getCode())))
-                .andExpect(jsonPath("$.message", is(USER_PHONE_EXISTS.getMessage())));
-        //and
-        verify(userService, times(1)).createUser(any(UserDTO.class));
-    }
+    // Then
+    mockMvc
+        .perform(
+            put(usersUrl + "/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updatedUser)))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.id", is(id)))
+        .andExpect(jsonPath("$.phoneNumber", is(updatedUser.getPhoneNumber())))
+        .andExpect(jsonPath("$.email", is(updatedUser.getEmail())));
 
-    //@Disabled
-    @Test
-    void testUpdateUser() throws Exception {
-        // given
-        final String id = "123";
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(id);
-        userDTO.setEmail("manji@gmail.com");
+    // and
+    verify(userService, times(1)).updateUser(eq(id), any(UserDTO.class));
+  }
 
-        User updatedUser = new User();
-        updatedUser.setId("123");
-        updatedUser.setPhoneNumber("987654321");
-        updatedUser.setEmail("updated@example.com");
+  @Test
+  void testUpdateUser_UserNotFound() throws Exception {
+    // given
+    final String id = "123";
+    UserDTO userDTO = new UserDTO("manji@gmail", "123456789", "pass@123");
+    userDTO.setId(id);
 
-        // When
-        when(userService.updateUser(eq(id), any(UserDTO.class))).thenReturn(updatedUser);
+    // when
+    when(userService.updateUser(eq(id), any(UserDTO.class))).thenThrow(userNotFoundSupplier.get());
 
-        //Then
-        mockMvc.perform(put(usersUrl + "/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedUser)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(id)))
-                .andExpect(jsonPath("$.phoneNumber", is(updatedUser.getPhoneNumber())))
-                .andExpect(jsonPath("$.email", is(updatedUser.getEmail())));
+    // then
+    mockMvc
+        .perform(
+            put(usersUrl + "/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDTO)))
+        .andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
+        .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
+    // and
+    verify(userService, times(1)).updateUser(eq(id), any(UserDTO.class));
+  }
 
-        //and
-        verify(userService, times(1)).updateUser(eq(id), any(UserDTO.class));
+  @Test
+  void testBlockUser() throws Exception {
+    // given
+    final String id = "123";
+    User blockedUser = new User("manji@gmail", "123456789", "pass@123");
+    blockedUser.setBlocked(true);
+    blockedUser.setId(id);
 
-    }
+    // when
+    when(userService.blockUser(id)).thenReturn(blockedUser);
 
-    @Test
-    void testUpdateUser_UserNotFound() throws Exception {
-        //given
-        final String id = "123";
-        UserDTO userDTO = new UserDTO("manji@gmail", "123456789", "pass@123");
-        userDTO.setId(id);
+    // then
+    mockMvc
+        .perform(put(usersUrl + "/block/{id}", id).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.id", is(id)))
+        .andExpect(jsonPath("$.phoneNumber", is(blockedUser.getPhoneNumber())))
+        .andExpect(jsonPath("$.email", is(blockedUser.getEmail())))
+        .andExpect(jsonPath("$.blocked", is(true)));
+    // and
+    verify(userService, times(1)).blockUser(id);
+  }
 
-        //when
-        when(userService.updateUser(eq(id), any(UserDTO.class))).thenThrow(userNotFoundSupplier.get());
+  @Test
+  void testBlockUser_userNotFound() throws Exception {
+    // given
+    final String id = "123";
 
-        //then
-        mockMvc.perform(put(usersUrl + "/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userDTO)))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
-                .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
-        //and
-        verify(userService, times(1)).updateUser(eq(id), any(UserDTO.class));
-    }
+    // when
+    when(userService.blockUser(id)).thenThrow(userNotFoundSupplier.get());
 
-    @Test
-    void testBlockUser() throws Exception {
-        //given
-        final String id = "123";
-        User blockedUser = new User("manji@gmail", "123456789", "pass@123");
-        blockedUser.setBlocked(true);
-        blockedUser.setId(id);
+    // then
+    mockMvc
+        .perform(put(usersUrl + "/block/{id}", id).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
+        .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
+    // and
+    verify(userService, times(1)).blockUser(id);
+  }
 
-        //when
-        when(userService.blockUser(id)).thenReturn(blockedUser);
+  @Test
+  void testUnblockUser() throws Exception {
+    // given
+    final String id = "123";
+    User blockedUser = new User("manji@gmail", "123456789", "pass@123");
+    blockedUser.setBlocked(false);
+    blockedUser.setId(id);
 
-        //then
-        mockMvc.perform(put(usersUrl + "/block/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(id)))
-                .andExpect(jsonPath("$.phoneNumber", is(blockedUser.getPhoneNumber())))
-                .andExpect(jsonPath("$.email", is(blockedUser.getEmail())))
-                .andExpect(jsonPath("$.blocked", is(true)));
-        //and
-        verify(userService, times(1)).blockUser(id);
-    }
+    // when
+    when(userService.unblockUser(id)).thenReturn(blockedUser);
 
-    @Test
-    void testBlockUser_userNotFound() throws Exception {
-        //given
-        final String id = "123";
+    // then
+    mockMvc
+        .perform(put(usersUrl + "/unblock/{id}", id).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.id", is(id)))
+        .andExpect(jsonPath("$.phoneNumber", is(blockedUser.getPhoneNumber())))
+        .andExpect(jsonPath("$.email", is(blockedUser.getEmail())))
+        .andExpect(jsonPath("$.blocked", is(false)));
+    // and
+    verify(userService, times(1)).unblockUser(id);
+  }
 
-        //when
-        when(userService.blockUser(id)).thenThrow(userNotFoundSupplier.get());
+  @Test
+  void testUnblockUser_userNotFound() throws Exception {
+    // given
+    final String id = "123";
+    // when
+    when(userService.unblockUser(id)).thenThrow(userNotFoundSupplier.get());
 
-        //then
-        mockMvc.perform(put(usersUrl + "/block/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
-                .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
-        //and
-        verify(userService, times(1)).blockUser(id);
-    }
+    // then
+    mockMvc
+        .perform(put(usersUrl + "/unblock/{id}", id).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
+        .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
 
-    @Test
-    void testUnblockUser() throws Exception {
-        //given
-        final String id = "123";
-        User blockedUser = new User("manji@gmail", "123456789", "pass@123");
-        blockedUser.setBlocked(false);
-        blockedUser.setId(id);
+    // and
+    verify(userService, times(1)).unblockUser(id);
+  }
 
-        //when
-        when(userService.unblockUser(id)).thenReturn(blockedUser);
+  @Test
+  void testDeleteUser() throws Exception {
+    // given
+    final String id = "123";
+    User deletedUser = new User("manji@gmail", "123456789", "pass@123");
+    deletedUser.setId(id);
+    deletedUser.setDeleted(true);
 
-        //then
-        mockMvc.perform(put(usersUrl + "/unblock/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(id)))
-                .andExpect(jsonPath("$.phoneNumber", is(blockedUser.getPhoneNumber())))
-                .andExpect(jsonPath("$.email", is(blockedUser.getEmail())))
-                .andExpect(jsonPath("$.blocked", is(false)));
-        //and
-        verify(userService, times(1)).unblockUser(id);
-    }
+    // when
+    when(userService.deleteUser(id)).thenReturn(deletedUser);
+    // then
+    mockMvc
+        .perform(delete(usersUrl + "/{id}", id).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id", is(id)))
+        .andExpect(jsonPath("$.phoneNumber", is(deletedUser.getPhoneNumber())))
+        .andExpect(jsonPath("$.email", is(deletedUser.getEmail())))
+        .andExpect(jsonPath("$.deleted", is(true)));
+    // and
+    verify(userService, times(1)).deleteUser(id);
+  }
 
-    @Test
-    void testUnblockUser_userNotFound() throws Exception {
-        //given
-        final String id = "123";
-        //when
-        when(userService.unblockUser(id)).thenThrow(userNotFoundSupplier.get());
+  @Test
+  void testDeleteUser_userNotFound() throws Exception {
+    // given
+    final String id = "123";
+    // when
+    when(userService.deleteUser(id)).thenThrow(userNotFoundSupplier.get());
+    // then
+    mockMvc
+        .perform(delete(usersUrl + "/{id}", id).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
+        .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
 
-        //then
-        mockMvc.perform(put(usersUrl + "/unblock/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
-                .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
-
-        //and
-        verify(userService, times(1)).unblockUser(id);
-    }
-
-
-    @Test
-    void testDeleteUser() throws Exception {
-        //given
-        final String id = "123";
-        User deletedUser = new User("manji@gmail", "123456789", "pass@123");
-        deletedUser.setId(id);
-        deletedUser.setDeleted(true);
-
-        //when
-        when(userService.deleteUser(id)).thenReturn(deletedUser);
-        //then
-        mockMvc.perform(delete(usersUrl+"/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(id)))
-                .andExpect(jsonPath("$.phoneNumber", is(deletedUser.getPhoneNumber())))
-                .andExpect(jsonPath("$.email", is(deletedUser.getEmail())))
-                .andExpect(jsonPath("$.deleted", is(true)));
-        //and
-        verify(userService,times(1)).deleteUser(id);
-}
-
-    @Test
-    void testDeleteUser_userNotFound() throws Exception {
-        //given
-        final String id = "123";
-        //when
-        when(userService.deleteUser(id)).thenThrow(userNotFoundSupplier.get());
-        //then
-        mockMvc.perform(delete(usersUrl+"/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
-                .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
-
-        //and
-        verify(userService,times(1)).deleteUser(id);
-    }
-
-
-
+    // and
+    verify(userService, times(1)).deleteUser(id);
+  }
 }
