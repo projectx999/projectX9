@@ -8,16 +8,9 @@ import lombok.Setter;
 @Getter
 public class UserDTO {
   private String id;
-
-  @NotNull(message = "phone number must not be null")
-  private String phone;
-
-  @NotNull(message = "email must not be null")
+  private String phoneNumber;
   private String email;
-
-  @NotNull(message = "password must not be null")
   private String password;
-
   private String name;
   private String country;
   private String defaultCurrency;
@@ -25,22 +18,25 @@ public class UserDTO {
 
   public UserDTO() {}
 
-  public UserDTO(String phone, String email, String password) {
-    this.phone = phone;
+  public UserDTO(
+      @NotNull(message = "phone number must not be null") String phoneNumber,
+      @NotNull(message = "email must not be null") String email,
+      @NotNull(message = "password must not be null") String password) {
+    this.phoneNumber = phoneNumber;
     this.email = email;
     this.password = password;
   }
 
   public UserDTO(
+      @NotNull(message = "phone number must not be null") String phoneNumber,
+      @NotNull(message = "email must not be null") String email,
+      @NotNull(message = "password must not be null") String password,
       String id,
-      String phone,
-      String email,
-      String password,
       String name,
       String country,
       String defaultCurrency,
       String language) {
-    this(phone, email, password);
+    this(phoneNumber, email, password);
     this.name = name;
     this.country = country;
     this.defaultCurrency = defaultCurrency;

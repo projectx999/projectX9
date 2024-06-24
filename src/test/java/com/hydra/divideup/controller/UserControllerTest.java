@@ -67,7 +67,7 @@ class UserControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(id)))
         .andExpect(jsonPath("$.email", is(user.getEmail())))
-        .andExpect(jsonPath("$.phone", is(user.getPhone())))
+        .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
         // make sure password not revealed outside
         .andExpect(jsonPath("$.password").doesNotExist());
 
@@ -115,13 +115,13 @@ class UserControllerTest {
         // user1
         .andExpect(jsonPath("$[0].id", is(user1.getId())))
         .andExpect(jsonPath("$[0].email", is(user1.getEmail())))
-        .andExpect(jsonPath("$[0].phone", is(user1.getPhone())))
+        .andExpect(jsonPath("$[0].phoneNumber", is(user1.getPhoneNumber())))
         // make sure password not revealed outside
         .andExpect(jsonPath("$[0].password").doesNotExist())
         // user2
         .andExpect(jsonPath("$[1].id", is(user2.getId())))
         .andExpect(jsonPath("$[1].email", is(user2.getEmail())))
-        .andExpect(jsonPath("$[1].phone", is(user2.getPhone())))
+        .andExpect(jsonPath("$[1].phoneNumber", is(user2.getPhoneNumber())))
         // make sure password not revealed outside
         .andExpect(jsonPath("$[1].password").doesNotExist());
     // and
@@ -139,8 +139,7 @@ class UserControllerTest {
   @Test
   void testCreateUser() throws Exception {
     // given
-    UserDTO userDTO =
-        new UserDTO(null, "123456789", "manji@gmail", "pass@123", null, null, null, null);
+    UserDTO userDTO = new UserDTO("manji@gmail", "123456789", "pass@123");
 
     final String id = "123";
     User user = new User("manji@gmail", "123456789", "pass@123");
@@ -157,7 +156,7 @@ class UserControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(id)))
         .andExpect(jsonPath("$.email", is(user.getEmail())))
-        .andExpect(jsonPath("$.phone", is(user.getPhone())))
+        .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
         // make sure password not revealed outside
         .andExpect(jsonPath("$.password").doesNotExist());
     // and
@@ -169,6 +168,7 @@ class UserControllerTest {
     // given
     UserDTO existingUser = new UserDTO();
     existingUser.setEmail("existing@example.com");
+
     // when
     when(userService.createUser(any(UserDTO.class)))
         .thenThrow(new RecordAlreadyExistsException(USER_EMAIL_EXISTS));
@@ -190,7 +190,7 @@ class UserControllerTest {
   void testCreateUser_ExistingPhoneNumber() throws Exception {
     // given
     UserDTO existingUser = new UserDTO();
-    existingUser.setPhone("123456789");
+    existingUser.setPhoneNumber("123456789");
 
     // when
     when(userService.createUser(any(UserDTO.class)))
@@ -220,7 +220,7 @@ class UserControllerTest {
 
     User updatedUser = new User();
     updatedUser.setId("123");
-    updatedUser.setPhone("987654321");
+    updatedUser.setPhoneNumber("987654321");
     updatedUser.setEmail("updated@example.com");
 
     // When
@@ -235,7 +235,7 @@ class UserControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(id)))
-        .andExpect(jsonPath("$.phone", is(updatedUser.getPhone())))
+        .andExpect(jsonPath("$.phoneNumber", is(updatedUser.getPhoneNumber())))
         .andExpect(jsonPath("$.email", is(updatedUser.getEmail())));
 
     // and
@@ -246,13 +246,12 @@ class UserControllerTest {
   void testUpdateUser_UserNotFound() throws Exception {
     // given
     final String id = "123";
-    UserDTO userDTO = new UserDTO();
+    UserDTO userDTO = new UserDTO("manji@gmail", "123456789", "pass@123");
     userDTO.setId(id);
-    userDTO.setEmail("manji@gmail");
-    userDTO.setPhone("123456789");
-    userDTO.setPassword("pass@123");
+
     // when
     when(userService.updateUser(eq(id), any(UserDTO.class))).thenThrow(userNotFoundSupplier.get());
+
     // then
     mockMvc
         .perform(
@@ -283,7 +282,7 @@ class UserControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(id)))
-        .andExpect(jsonPath("$.phone", is(blockedUser.getPhone())))
+        .andExpect(jsonPath("$.phoneNumber", is(blockedUser.getPhoneNumber())))
         .andExpect(jsonPath("$.email", is(blockedUser.getEmail())))
         .andExpect(jsonPath("$.blocked", is(true)));
     // and
@@ -325,7 +324,7 @@ class UserControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(id)))
-        .andExpect(jsonPath("$.phone", is(blockedUser.getPhone())))
+        .andExpect(jsonPath("$.phoneNumber", is(blockedUser.getPhoneNumber())))
         .andExpect(jsonPath("$.email", is(blockedUser.getEmail())))
         .andExpect(jsonPath("$.blocked", is(false)));
     // and
@@ -365,7 +364,7 @@ class UserControllerTest {
         .perform(delete(usersUrl + "/{id}", id).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(id)))
-        .andExpect(jsonPath("$.phone", is(deletedUser.getPhone())))
+        .andExpect(jsonPath("$.phoneNumber", is(deletedUser.getPhoneNumber())))
         .andExpect(jsonPath("$.email", is(deletedUser.getEmail())))
         .andExpect(jsonPath("$.deleted", is(true)));
     // and

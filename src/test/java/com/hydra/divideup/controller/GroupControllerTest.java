@@ -55,6 +55,7 @@ public class GroupControllerTest {
 
   private final String groupsUrl = "/api/v1/groups";
 
+  @Test
   void testGetGroup() throws Exception {
     // given
     final String id = "123";
