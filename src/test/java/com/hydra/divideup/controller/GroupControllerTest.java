@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +48,6 @@ public class GroupControllerTest {
   @MockBean private GroupService groupService;
 
   @Autowired ObjectMapper objectMapper;
-
-  private final Supplier<RecordNotFoundException> groupNotFoundSupplier =
-      () -> new RecordNotFoundException(GROUP_NOT_FOUND);
 
   private final String groupsUrl = "/api/v1/groups";
 
@@ -81,7 +77,7 @@ public class GroupControllerTest {
     final String id = "234";
 
     // when
-    when(groupService.getGroup(id)).thenThrow(groupNotFoundSupplier.get());
+    when(groupService.getGroup(id)).thenThrow(new RecordNotFoundException(GROUP_NOT_FOUND));
 
     // then
     mockMvc
@@ -233,7 +229,7 @@ public class GroupControllerTest {
 
     // when
     when(groupService.updateGroup(eq(groupId), any(Group.class)))
-        .thenThrow(groupNotFoundSupplier.get());
+        .thenThrow(new RecordNotFoundException(GROUP_NOT_FOUND));
 
     // then
     mockMvc

@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hydra.divideup.entity.Payment;
-import com.hydra.divideup.enums.Currency;
 import com.hydra.divideup.enums.SplitType;
 import com.hydra.divideup.service.PaymentService;
 import org.junit.jupiter.api.Test;
@@ -37,7 +36,7 @@ class PaymentControllerTest {
   void testCreatePayment() throws Exception {
     // given
     final String id = "123";
-    Payment payment = new Payment("paid_user", Currency.SEK, 200, SplitType.PERCENTAGE);
+    Payment payment = new Payment("paid_user", "SEK", 200, SplitType.PERCENTAGE);
 
     Payment createdPayment =
         new Payment(

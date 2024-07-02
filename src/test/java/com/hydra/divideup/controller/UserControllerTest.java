@@ -26,7 +26,6 @@ import com.hydra.divideup.model.UserDTO;
 import com.hydra.divideup.service.UserService;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -45,9 +44,6 @@ class UserControllerTest {
   @MockBean private UserService userService;
 
   @Autowired private ObjectMapper objectMapper;
-
-  private final Supplier<RecordNotFoundException> userNotFoundSupplier =
-      () -> new RecordNotFoundException(USER_NOT_FOUND);
 
   private final String usersUrl = "/api/v1/users";
 
@@ -250,7 +246,8 @@ class UserControllerTest {
     userDTO.setId(id);
 
     // when
-    when(userService.updateUser(eq(id), any(UserDTO.class))).thenThrow(userNotFoundSupplier.get());
+    when(userService.updateUser(eq(id), any(UserDTO.class)))
+        .thenThrow(new RecordNotFoundException(USER_NOT_FOUND));
 
     // then
     mockMvc
@@ -295,7 +292,7 @@ class UserControllerTest {
     final String id = "123";
 
     // when
-    when(userService.blockUser(id)).thenThrow(userNotFoundSupplier.get());
+    when(userService.blockUser(id)).thenThrow(new RecordNotFoundException(USER_NOT_FOUND));
 
     // then
     mockMvc
@@ -336,7 +333,7 @@ class UserControllerTest {
     // given
     final String id = "123";
     // when
-    when(userService.unblockUser(id)).thenThrow(userNotFoundSupplier.get());
+    when(userService.unblockUser(id)).thenThrow(new RecordNotFoundException(USER_NOT_FOUND));
 
     // then
     mockMvc
@@ -376,7 +373,7 @@ class UserControllerTest {
     // given
     final String id = "123";
     // when
-    when(userService.deleteUser(id)).thenThrow(userNotFoundSupplier.get());
+    when(userService.deleteUser(id)).thenThrow(new RecordNotFoundException(USER_NOT_FOUND));
     // then
     mockMvc
         .perform(delete(usersUrl + "/{id}", id).contentType(MediaType.APPLICATION_JSON))
