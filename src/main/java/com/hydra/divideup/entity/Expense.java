@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Setter
 @Document
 public class Expense {
-
   private String id;
   private String userId;
   private String groupId;

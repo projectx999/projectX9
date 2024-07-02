@@ -29,7 +29,7 @@ public class GroupController {
     return ResponseEntity.ok(groupService.getGroup(id));
   }
 
-  @GetMapping("users/{userId}")
+  @GetMapping("user/{userId}")
   public ResponseEntity<List<Group>> getGroupsByUser(@PathVariable String userId) {
     return ResponseEntity.ok(groupService.getGroupsByUser(userId));
   }

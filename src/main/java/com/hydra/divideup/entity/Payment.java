@@ -26,4 +26,14 @@ public class Payment {
   private boolean settled;
   @NotNull private SplitType splitType;
   private Map<String, Double> splitDetails;
+
+  public Payment() {}
+
+  public Payment(String paidBy, String currency, double amount, SplitType splitType) {
+    this.paidBy = paidBy;
+    this.category = category;
+    this.splitType = splitType;
+    this.currency = currency;
+    this.amount = amount;
+  }
 }
