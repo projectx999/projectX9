@@ -16,6 +16,7 @@ public class User {
   private String email;
   private String country;
   private String phoneNumber;
+
   @JsonIgnore private String password;
   private String defaultCurrency;
   private String language;
