@@ -4,6 +4,7 @@ import static com.hydra.divideup.exception.DivideUpError.PAYMENT_AMOUNT;
 import static com.hydra.divideup.exception.DivideUpError.PAYMENT_SPLIT_TYPE;
 import static com.hydra.divideup.exception.DivideUpError.PAYMENT_VALIDATE_PAYEE;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
 import com.hydra.divideup.entity.Payment;
@@ -70,9 +71,11 @@ public class PaymentService {
   }
 
   private void validateGroupUsersInSplitDetails(Map<String, Double> splitDetails, String groupId) {
-    var group = groupService.getGroup(groupId);
-    if (group.getMembers().containsAll(splitDetails.keySet())) {
-      throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+    if (nonNull(groupId)) {
+      var group = groupService.getGroup(groupId);
+      if (group.getMembers().containsAll(splitDetails.keySet())) {
+        throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+      }
     }
   }
 
