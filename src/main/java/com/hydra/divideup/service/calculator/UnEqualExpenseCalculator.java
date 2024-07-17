@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 @Component
-public final class UnEqualExpenseCalculator extends ExpenseCalculator {
+public final class UnEqualExpenseCalculator implements ExpenseCalculator {
 
   @Override
-  protected List<Expense> calculateExpensesForGroupExpense(Payment payment) {
+  public List<Expense> calculateExpenses(Payment payment) {
     var amount = BigDecimal.valueOf(payment.getAmount());
     var splitDetails = payment.getSplitDetails();
 
@@ -34,8 +34,4 @@ public final class UnEqualExpenseCalculator extends ExpenseCalculator {
     return expenses;
   }
 
-  @Override
-  protected List<Expense> calculateExpensesForIndividualExpense(Payment payment) {
-    return List.of();
-  }
 }
