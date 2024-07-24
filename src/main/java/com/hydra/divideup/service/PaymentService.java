@@ -2,6 +2,7 @@ package com.hydra.divideup.service;
 
 import static com.hydra.divideup.exception.DivideUpError.PAYMENT_AMOUNT;
 import static com.hydra.divideup.exception.DivideUpError.PAYMENT_SPLIT_TYPE;
+import static com.hydra.divideup.exception.DivideUpError.PAYMENT_VALIDATE_PAID_BY;
 import static com.hydra.divideup.exception.DivideUpError.PAYMENT_VALIDATE_PAYEE;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -11,8 +12,10 @@ import com.hydra.divideup.entity.Payment;
 import com.hydra.divideup.enums.SplitType;
 import com.hydra.divideup.exception.IllegalOperationException;
 import com.hydra.divideup.repository.PaymentRepository;
+import com.hydra.divideup.repository.UserRepository;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,7 @@ public class PaymentService {
   private final UserService userService;
 
   private final GroupService groupService;
+  private final UserRepository userRepository;
 
   @Transactional
   public Payment createPayment(Payment payment) {
@@ -42,6 +46,8 @@ public class PaymentService {
     if (isNull(payment.getGroupId()) || isNull(payment.getUserId())) {
       throw new IllegalOperationException(PAYMENT_VALIDATE_PAYEE);
     }
+    userRepository.findById(payment.getPaidBy())
+        .orElseThrow(() -> new IllegalOperationException(PAYMENT_VALIDATE_PAID_BY));
     if (payment.getAmount() <= 0) {
       throw new IllegalOperationException(PAYMENT_AMOUNT);
     }
@@ -71,12 +77,10 @@ public class PaymentService {
   }
 
   private void validateGroupUsersInSplitDetails(Map<String, Double> splitDetails, String groupId) {
-    if (nonNull(groupId)) {
       var group = groupService.getGroup(groupId);
       if (group.getMembers().containsAll(splitDetails.keySet())) {
         throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
       }
-    }
   }
 
   private void validateSplitPercentage(Map<String, Double> splitDetails) {
