@@ -11,12 +11,13 @@ public enum DivideUpError {
   USER_PHONE_EXISTS(1004, "User with phoneNumber already exists"),
   GROUP_NOT_FOUND(2001, "Group not found"),
   GROUP_DELETE_UNSETTLE(2002, "Group is not settled for delete"),
-  PAYMENT_VALIDATE_PAYEE(3001, "Group or user are required"),
+  PAYMENT_VALIDATE_PAYEE(3001, "Valid group or user are required"),
   PAYMENT_SPLIT_TYPE(3002, "Invalid split type, invalid user details present in split details"),
   PAYMENT_SPLIT_PERCENTAGE(3003, "Sum of split details should be 100 for percentage split type"),
   PAYMENT_SPLIT_SHARE(3004, "Share value should be positive"),
   PAYMENT_SPLIT_UNEQUAL(3005, "Sum of split details should be equal to amount"),
-  PAYMENT_AMOUNT(3006, "Amount should be positive");
+  PAYMENT_AMOUNT(3006, "Amount should be positive"),
+  PAYMENT_VALIDATE_PAID_BY(3007, "Invalid paid by user");
   private final int code;
   private final String message;
   private final LocalDateTime timestamp;
