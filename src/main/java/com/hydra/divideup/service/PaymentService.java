@@ -1,8 +1,6 @@
 package com.hydra.divideup.service;
 
-import static com.hydra.divideup.exception.DivideUpError.PAYMENT_AMOUNT;
-import static com.hydra.divideup.exception.DivideUpError.PAYMENT_SPLIT_TYPE;
-import static com.hydra.divideup.exception.DivideUpError.PAYMENT_VALIDATE_PAYEE;
+import static com.hydra.divideup.exception.DivideUpError.*;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
@@ -81,8 +79,13 @@ public class PaymentService {
 
   private void validateSplitPercentage(Map<String, Double> splitDetails) {
     var percentageSum = splitDetails.values().stream().mapToDouble(Double::doubleValue).sum();
+    for(var i : splitDetails.values()){
+      if(i <= 0 || i > 100){
+        throw new IllegalOperationException(PAYMENT_SPLIT_PERCENTAGE_NOT_VALID);
+      }
+    }
     if (percentageSum != 100) {
-      throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+      throw new IllegalOperationException(PAYMENT_SPLIT_PERCENTAGE);
     }
   }
 
