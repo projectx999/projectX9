@@ -4,6 +4,7 @@ import com.hydra.divideup.enums.SplitType;
 import java.time.LocalDateTime;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter
 @Setter
 @Document
+@Builder
 public class Payment {
 
   private String id;
