@@ -1,6 +1,8 @@
 package com.hydra.divideup.service;
 
-import static com.hydra.divideup.exception.DivideUpError.*;
+import static com.hydra.divideup.exception.DivideUpError.USER_EMAIL_EXISTS;
+import static com.hydra.divideup.exception.DivideUpError.USER_NOT_FOUND;
+import static com.hydra.divideup.exception.DivideUpError.USER_PHONE_EXISTS;
 
 import com.hydra.divideup.entity.User;
 import com.hydra.divideup.exception.RecordAlreadyExistsException;
@@ -8,6 +10,7 @@ import com.hydra.divideup.exception.RecordNotFoundException;
 import com.hydra.divideup.model.UserDTO;
 import com.hydra.divideup.repository.UserRepository;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,7 +31,7 @@ public class UserService {
 
   public User createUser(UserDTO userDTO) {
     String encodedPwd = passwordEncoder.encode(userDTO.getPassword());
-    User newUser = new User(userDTO.getEmail(), userDTO.getPhoneNumber(), encodedPwd);
+    User newUser = new User(userDTO.getEmail(), userDTO.getPhone(), encodedPwd);
     validateCreateUser(newUser);
     return userRepository.save(newUser);
   }
@@ -41,13 +44,17 @@ public class UserService {
     return userRepository.findAll();
   }
 
+  public List<User> getUsers(Set<String> ids) {
+    return userRepository.findAllById(ids);
+  }
+
   public User updateUser(String id, UserDTO userDTO) {
     User existingUser =
         userRepository.findById(id).orElseThrow(() -> new RecordNotFoundException(USER_NOT_FOUND));
     validateUpdateUser(userDTO, existingUser);
     existingUser.setName(userDTO.getName());
     existingUser.setEmail(userDTO.getEmail());
-    existingUser.setPhoneNumber(userDTO.getPhoneNumber());
+    existingUser.setPhone(userDTO.getPhone());
     existingUser.setCountry(userDTO.getCountry());
     existingUser.setDefaultCurrency(userDTO.getDefaultCurrency());
     existingUser.setLanguage(userDTO.getLanguage());
@@ -56,7 +63,7 @@ public class UserService {
 
   void validateUpdateUser(UserDTO userDTO, User existingUser) {
     List<User> byEmailOrPhoneNumber =
-        userRepository.findByEmailOrPhoneNumber(userDTO.getEmail(), userDTO.getPhoneNumber());
+        userRepository.findByEmailOrPhone(userDTO.getEmail(), userDTO.getPhone());
     if (!existingUser.getEmail().equalsIgnoreCase(userDTO.getEmail())) {
       byEmailOrPhoneNumber.stream()
           .map(User::getEmail)
@@ -67,10 +74,10 @@ public class UserService {
                 throw new RecordAlreadyExistsException(USER_EMAIL_EXISTS);
               });
     }
-    if (!existingUser.getPhoneNumber().equalsIgnoreCase(userDTO.getPhoneNumber())) {
+    if (!existingUser.getPhone().equalsIgnoreCase(userDTO.getPhone())) {
       byEmailOrPhoneNumber.stream()
-          .map(User::getPhoneNumber)
-          .filter(s -> s.equalsIgnoreCase(userDTO.getPhoneNumber()))
+          .map(User::getPhone)
+          .filter(s -> s.equalsIgnoreCase(userDTO.getPhone()))
           .findAny()
           .ifPresent(
               u -> {
@@ -81,7 +88,7 @@ public class UserService {
 
   void validateCreateUser(User user) {
     List<User> byEmailOrPhoneNumber =
-        userRepository.findByEmailOrPhoneNumber(user.getEmail(), user.getPhoneNumber());
+        userRepository.findByEmailOrPhone(user.getEmail(), user.getPhone());
 
     byEmailOrPhoneNumber.stream()
         .map(User::getEmail)
@@ -93,8 +100,8 @@ public class UserService {
             });
 
     byEmailOrPhoneNumber.stream()
-        .map(User::getPhoneNumber)
-        .filter(s -> s.equalsIgnoreCase(user.getPhoneNumber()))
+        .map(User::getPhone)
+        .filter(s -> s.equalsIgnoreCase(user.getPhone()))
         .findAny()
         .ifPresent(
             u -> {

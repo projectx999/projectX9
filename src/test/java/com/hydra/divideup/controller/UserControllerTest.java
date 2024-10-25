@@ -26,6 +26,7 @@ import com.hydra.divideup.model.UserDTO;
 import com.hydra.divideup.service.UserService;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -35,8 +36,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(
-    controllers = UserController.class,
-    excludeAutoConfiguration = {SecurityAutoConfiguration.class})
+        controllers = UserController.class,
+        excludeAutoConfiguration = {SecurityAutoConfiguration.class})
 class UserControllerTest {
 
   @Autowired private MockMvc mockMvc;
@@ -44,6 +45,9 @@ class UserControllerTest {
   @MockBean private UserService userService;
 
   @Autowired private ObjectMapper objectMapper;
+
+  private final Supplier<RecordNotFoundException> userNotFoundSupplier =
+          () -> new RecordNotFoundException(USER_NOT_FOUND);
 
   private final String usersUrl = "/api/v1/users";
 
@@ -59,13 +63,13 @@ class UserControllerTest {
 
     // then
     mockMvc
-        .perform(get(usersUrl + "/{id}", id))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id", is(id)))
-        .andExpect(jsonPath("$.email", is(user.getEmail())))
-        .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
-        // make sure password not revealed outside
-        .andExpect(jsonPath("$.password").doesNotExist());
+            .perform(get(usersUrl + "/{id}", id))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(id)))
+            .andExpect(jsonPath("$.email", is(user.getEmail())))
+            .andExpect(jsonPath("$.phone", is(user.getPhone())))
+            // make sure password not revealed outside
+            .andExpect(jsonPath("$.password").doesNotExist());
 
     // and
     verify(userService, times(1)).getUser(id);
@@ -81,10 +85,10 @@ class UserControllerTest {
 
     // then
     mockMvc
-        .perform(get(usersUrl + "/{id}", id))
-        .andExpect(status().isInternalServerError())
-        .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
-        .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
+            .perform(get(usersUrl + "/{id}", id))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
+            .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
     // And
     verify(userService, times(1)).getUser(id);
   }
@@ -105,21 +109,21 @@ class UserControllerTest {
 
     // then
     mockMvc
-        .perform(get(usersUrl))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(2)))
-        // user1
-        .andExpect(jsonPath("$[0].id", is(user1.getId())))
-        .andExpect(jsonPath("$[0].email", is(user1.getEmail())))
-        .andExpect(jsonPath("$[0].phoneNumber", is(user1.getPhoneNumber())))
-        // make sure password not revealed outside
-        .andExpect(jsonPath("$[0].password").doesNotExist())
-        // user2
-        .andExpect(jsonPath("$[1].id", is(user2.getId())))
-        .andExpect(jsonPath("$[1].email", is(user2.getEmail())))
-        .andExpect(jsonPath("$[1].phoneNumber", is(user2.getPhoneNumber())))
-        // make sure password not revealed outside
-        .andExpect(jsonPath("$[1].password").doesNotExist());
+            .perform(get(usersUrl))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
+            // user1
+            .andExpect(jsonPath("$[0].id", is(user1.getId())))
+            .andExpect(jsonPath("$[0].email", is(user1.getEmail())))
+            .andExpect(jsonPath("$[0].phone", is(user1.getPhone())))
+            // make sure password not revealed outside
+            .andExpect(jsonPath("$[0].password").doesNotExist())
+            // user2
+            .andExpect(jsonPath("$[1].id", is(user2.getId())))
+            .andExpect(jsonPath("$[1].email", is(user2.getEmail())))
+            .andExpect(jsonPath("$[1].phone", is(user2.getPhone())))
+            // make sure password not revealed outside
+            .andExpect(jsonPath("$[1].password").doesNotExist());
     // and
     verify(userService, times(1)).getUsers();
   }
@@ -135,7 +139,8 @@ class UserControllerTest {
   @Test
   void testCreateUser() throws Exception {
     // given
-    UserDTO userDTO = new UserDTO("manji@gmail", "123456789", "pass@123");
+    UserDTO userDTO =
+            new UserDTO(null, "123456789", "manji@gmail", "pass@123", null, null, null, null);
 
     final String id = "123";
     User user = new User("manji@gmail", "123456789", "pass@123");
@@ -145,16 +150,16 @@ class UserControllerTest {
     when(userService.createUser(any(UserDTO.class))).thenReturn(user);
     // then
     mockMvc
-        .perform(
-            post(usersUrl)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDTO)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id", is(id)))
-        .andExpect(jsonPath("$.email", is(user.getEmail())))
-        .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
-        // make sure password not revealed outside
-        .andExpect(jsonPath("$.password").doesNotExist());
+            .perform(
+                    post(usersUrl)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(userDTO)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(id)))
+            .andExpect(jsonPath("$.email", is(user.getEmail())))
+            .andExpect(jsonPath("$.phone", is(user.getPhone())))
+            // make sure password not revealed outside
+            .andExpect(jsonPath("$.password").doesNotExist());
     // and
     verify(userService, times(1)).createUser(any(UserDTO.class));
   }
@@ -164,20 +169,19 @@ class UserControllerTest {
     // given
     UserDTO existingUser = new UserDTO();
     existingUser.setEmail("existing@example.com");
-
     // when
     when(userService.createUser(any(UserDTO.class)))
-        .thenThrow(new RecordAlreadyExistsException(USER_EMAIL_EXISTS));
+            .thenThrow(new RecordAlreadyExistsException(USER_EMAIL_EXISTS));
 
     // then
     mockMvc
-        .perform(
-            post(usersUrl)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(existingUser)))
-        .andExpect(status().isInternalServerError())
-        .andExpect(jsonPath("$.code", is(USER_EMAIL_EXISTS.getCode())))
-        .andExpect(jsonPath("$.message", is(USER_EMAIL_EXISTS.getMessage())));
+            .perform(
+                    post(usersUrl)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(existingUser)))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.code", is(USER_EMAIL_EXISTS.getCode())))
+            .andExpect(jsonPath("$.message", is(USER_EMAIL_EXISTS.getMessage())));
     // and
     verify(userService, times(1)).createUser(any(UserDTO.class));
   }
@@ -186,21 +190,21 @@ class UserControllerTest {
   void testCreateUser_ExistingPhoneNumber() throws Exception {
     // given
     UserDTO existingUser = new UserDTO();
-    existingUser.setPhoneNumber("123456789");
+    existingUser.setPhone("123456789");
 
     // when
     when(userService.createUser(any(UserDTO.class)))
-        .thenThrow(new RecordAlreadyExistsException(USER_PHONE_EXISTS));
+            .thenThrow(new RecordAlreadyExistsException(USER_PHONE_EXISTS));
 
     // then
     mockMvc
-        .perform(
-            post(usersUrl)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(existingUser)))
-        .andExpect(status().isInternalServerError())
-        .andExpect(jsonPath("$.code", is(USER_PHONE_EXISTS.getCode())))
-        .andExpect(jsonPath("$.message", is(USER_PHONE_EXISTS.getMessage())));
+            .perform(
+                    post(usersUrl)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(existingUser)))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.code", is(USER_PHONE_EXISTS.getCode())))
+            .andExpect(jsonPath("$.message", is(USER_PHONE_EXISTS.getMessage())));
     // and
     verify(userService, times(1)).createUser(any(UserDTO.class));
   }
@@ -216,7 +220,7 @@ class UserControllerTest {
 
     User updatedUser = new User();
     updatedUser.setId("123");
-    updatedUser.setPhoneNumber("987654321");
+    updatedUser.setPhone("987654321");
     updatedUser.setEmail("updated@example.com");
 
     // When
@@ -224,15 +228,15 @@ class UserControllerTest {
 
     // Then
     mockMvc
-        .perform(
-            put(usersUrl + "/{id}", id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updatedUser)))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id", is(id)))
-        .andExpect(jsonPath("$.phoneNumber", is(updatedUser.getPhoneNumber())))
-        .andExpect(jsonPath("$.email", is(updatedUser.getEmail())));
+            .perform(
+                    put(usersUrl + "/{id}", id)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(updatedUser)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id", is(id)))
+            .andExpect(jsonPath("$.phone", is(updatedUser.getPhone())))
+            .andExpect(jsonPath("$.email", is(updatedUser.getEmail())));
 
     // and
     verify(userService, times(1)).updateUser(eq(id), any(UserDTO.class));
@@ -242,22 +246,22 @@ class UserControllerTest {
   void testUpdateUser_UserNotFound() throws Exception {
     // given
     final String id = "123";
-    UserDTO userDTO = new UserDTO("manji@gmail", "123456789", "pass@123");
+    UserDTO userDTO = new UserDTO();
     userDTO.setId(id);
-
+    userDTO.setEmail("manji@gmail");
+    userDTO.setPhone("123456789");
+    userDTO.setPassword("pass@123");
     // when
-    when(userService.updateUser(eq(id), any(UserDTO.class)))
-        .thenThrow(new RecordNotFoundException(USER_NOT_FOUND));
-
+    when(userService.updateUser(eq(id), any(UserDTO.class))).thenThrow(userNotFoundSupplier.get());
     // then
     mockMvc
-        .perform(
-            put(usersUrl + "/{id}", id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDTO)))
-        .andExpect(status().isInternalServerError())
-        .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
-        .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
+            .perform(
+                    put(usersUrl + "/{id}", id)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(userDTO)))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
+            .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
     // and
     verify(userService, times(1)).updateUser(eq(id), any(UserDTO.class));
   }
@@ -275,13 +279,13 @@ class UserControllerTest {
 
     // then
     mockMvc
-        .perform(put(usersUrl + "/block/{id}", id).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id", is(id)))
-        .andExpect(jsonPath("$.phoneNumber", is(blockedUser.getPhoneNumber())))
-        .andExpect(jsonPath("$.email", is(blockedUser.getEmail())))
-        .andExpect(jsonPath("$.blocked", is(true)));
+            .perform(put(usersUrl + "/block/{id}", id).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id", is(id)))
+            .andExpect(jsonPath("$.phone", is(blockedUser.getPhone())))
+            .andExpect(jsonPath("$.email", is(blockedUser.getEmail())))
+            .andExpect(jsonPath("$.blocked", is(true)));
     // and
     verify(userService, times(1)).blockUser(id);
   }
@@ -292,14 +296,14 @@ class UserControllerTest {
     final String id = "123";
 
     // when
-    when(userService.blockUser(id)).thenThrow(new RecordNotFoundException(USER_NOT_FOUND));
+    when(userService.blockUser(id)).thenThrow(userNotFoundSupplier.get());
 
     // then
     mockMvc
-        .perform(put(usersUrl + "/block/{id}", id).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isInternalServerError())
-        .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
-        .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
+            .perform(put(usersUrl + "/block/{id}", id).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
+            .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
     // and
     verify(userService, times(1)).blockUser(id);
   }
@@ -317,13 +321,13 @@ class UserControllerTest {
 
     // then
     mockMvc
-        .perform(put(usersUrl + "/unblock/{id}", id).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id", is(id)))
-        .andExpect(jsonPath("$.phoneNumber", is(blockedUser.getPhoneNumber())))
-        .andExpect(jsonPath("$.email", is(blockedUser.getEmail())))
-        .andExpect(jsonPath("$.blocked", is(false)));
+            .perform(put(usersUrl + "/unblock/{id}", id).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id", is(id)))
+            .andExpect(jsonPath("$.phone", is(blockedUser.getPhone())))
+            .andExpect(jsonPath("$.email", is(blockedUser.getEmail())))
+            .andExpect(jsonPath("$.blocked", is(false)));
     // and
     verify(userService, times(1)).unblockUser(id);
   }
@@ -333,14 +337,14 @@ class UserControllerTest {
     // given
     final String id = "123";
     // when
-    when(userService.unblockUser(id)).thenThrow(new RecordNotFoundException(USER_NOT_FOUND));
+    when(userService.unblockUser(id)).thenThrow(userNotFoundSupplier.get());
 
     // then
     mockMvc
-        .perform(put(usersUrl + "/unblock/{id}", id).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isInternalServerError())
-        .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
-        .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
+            .perform(put(usersUrl + "/unblock/{id}", id).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
+            .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
 
     // and
     verify(userService, times(1)).unblockUser(id);
@@ -358,12 +362,12 @@ class UserControllerTest {
     when(userService.deleteUser(id)).thenReturn(deletedUser);
     // then
     mockMvc
-        .perform(delete(usersUrl + "/{id}", id).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id", is(id)))
-        .andExpect(jsonPath("$.phoneNumber", is(deletedUser.getPhoneNumber())))
-        .andExpect(jsonPath("$.email", is(deletedUser.getEmail())))
-        .andExpect(jsonPath("$.deleted", is(true)));
+            .perform(delete(usersUrl + "/{id}", id).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(id)))
+            .andExpect(jsonPath("$.phone", is(deletedUser.getPhone())))
+            .andExpect(jsonPath("$.email", is(deletedUser.getEmail())))
+            .andExpect(jsonPath("$.deleted", is(true)));
     // and
     verify(userService, times(1)).deleteUser(id);
   }
@@ -373,13 +377,13 @@ class UserControllerTest {
     // given
     final String id = "123";
     // when
-    when(userService.deleteUser(id)).thenThrow(new RecordNotFoundException(USER_NOT_FOUND));
+    when(userService.deleteUser(id)).thenThrow(userNotFoundSupplier.get());
     // then
     mockMvc
-        .perform(delete(usersUrl + "/{id}", id).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isInternalServerError())
-        .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
-        .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
+            .perform(delete(usersUrl + "/{id}", id).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.code", is(USER_NOT_FOUND.getCode())))
+            .andExpect(jsonPath("$.message", is(USER_NOT_FOUND.getMessage())));
 
     // and
     verify(userService, times(1)).deleteUser(id);
