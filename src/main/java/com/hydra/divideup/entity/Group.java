@@ -20,20 +20,21 @@ public class Group {
   private String groupName;
   private String groupDescription;
   @NotNull private Set<String> members;
+
   @CreatedBy @NotNull
   private String createdBy; // todo passing from UI will change to logged in user
+
   @CreatedDate private String createdTime;
   @LastModifiedBy private String updatedBy;
   @LastModifiedDate private String updatedTime;
   private String type;
   private boolean isSettled;
 
-    public Group() {}
+  public Group() {}
 
-    public Group(String groupName, Set<String> members, String createdBy) {
+  public Group(String groupName, Set<String> members, String createdBy) {
     this.groupName = groupName;
     this.members = members;
     this.createdBy = createdBy;
   }
-
 }
