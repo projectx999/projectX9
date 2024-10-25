@@ -16,7 +16,6 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 @Builder
 @AllArgsConstructor
 public class Expense {
-
   private String id;
   private String userId;
   private String groupId;
