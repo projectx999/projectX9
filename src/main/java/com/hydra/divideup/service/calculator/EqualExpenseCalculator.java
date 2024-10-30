@@ -27,4 +27,5 @@ public final class EqualExpenseCalculator implements ExpenseCalculator {
     expenses.add(new Expense(payment, payment.getPaidBy(), getPayeeAmount(expenses)));
     return expenses;
   }
+
 }
