@@ -2,13 +2,15 @@ package com.hydra.divideup.service.calculator;
 
 import com.hydra.divideup.entity.Expense;
 import com.hydra.divideup.entity.Payment;
+import com.hydra.divideup.repository.GroupRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor

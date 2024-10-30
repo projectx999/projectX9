@@ -2,6 +2,8 @@ package com.hydra.divideup.service.calculator;
 
 import com.hydra.divideup.entity.Expense;
 import com.hydra.divideup.entity.Payment;
+import org.springframework.stereotype.Component;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.math.BigDecimal;
@@ -12,7 +14,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 @Component
-public final class UnEqualExpenseCalculator extends ExpenseCalculator {
+public final class UnEqualExpenseCalculator implements ExpenseCalculator {
 
   @Override
   public List<Expense> calculateExpenses(Payment payment) {
