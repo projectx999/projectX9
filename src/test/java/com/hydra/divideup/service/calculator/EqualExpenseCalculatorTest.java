@@ -120,8 +120,4 @@ public class EqualExpenseCalculatorTest {
         .contains(tuple("222", BigDecimal.valueOf(-80.0)), tuple("111", BigDecimal.valueOf(80.0)));
   }
 
-  @Test
-  void test() {
-    System.out.println(System.getProperty("os.name"));
-  }
 }
