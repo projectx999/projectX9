@@ -27,7 +27,9 @@ class PaymentRepositoryTest {
   void testFindByGroupIdAndIsSettledTrue() {
     // Given
     String groupId = "testGroupId";
-    Payment payment = Payment.builder().groupId(groupId).settled(true).build();
+    Payment payment = new Payment();
+    payment.setGroupId(groupId);
+    payment.setSettled(true);
     paymentRepository.save(payment);
 
     // When
@@ -42,7 +44,9 @@ class PaymentRepositoryTest {
   void testFindByGroupIdAndIsSettledFalse() {
     // Given
     String groupId = "testGroupId";
-    Payment payment = Payment.builder().groupId(groupId).settled(false).build();
+    Payment payment = new Payment();
+    payment.setGroupId(groupId);
+    payment.setSettled(false);
     paymentRepository.save(payment);
 
     // When

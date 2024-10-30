@@ -19,21 +19,19 @@ public class EqualExpenseCalculatorTest {
   @InjectMocks private EqualExpenseCalculator equalExpenseCalculator;
 
   @Test
-  void testCalculateExpensesForGroupExpensePayByIn() {
+  void testCalculateExpensesPaidBy_Involved() {
     // given
     String groupId = "123";
 
-    Payment payment =
-        Payment.builder()
-            .id("999")
-            .groupId(groupId)
-            .paidBy("111")
-            .amount(80)
-            .splitDetails(Map.of("111", 0.0, "222", 0.0, "333", 0.0, "444", 0.0))
-            .build();
+    Payment payment = new Payment();
+    payment.setId("999");
+    payment.setGroupId(groupId);
+    payment.setPaidBy("111");
+    payment.setAmount(80);
+    payment.setSplitDetails(Map.of("111", 0.0, "222", 0.0, "333", 0.0, "444", 0.0));
 
     // when
-    List<Expense> payments = equalExpenseCalculator.calculateExpensesForGroupExpense(payment);
+    List<Expense> payments = equalExpenseCalculator.calculateExpenses(payment);
 
     // then
     assertThat(payments)
@@ -47,20 +45,18 @@ public class EqualExpenseCalculatorTest {
   }
 
   @Test
-  void testCalculateExpensesForGroupExpensePayByOut() {
+  void testCalculateExpensesPaidBy_NotInvolved() {
     String groupId = "123";
 
-    Payment payment =
-        Payment.builder()
-            .id("999")
-            .groupId(groupId)
-            .paidBy("100")
-            .amount(80)
-            .splitDetails(Map.of("111", 0.0, "222", 0.0, "333", 0.0, "444", 0.0))
-            .build();
+    Payment payment = new Payment();
+    payment.setId("999");
+    payment.setGroupId(groupId);
+    payment.setPaidBy("100");
+    payment.setAmount(80);
+    payment.setSplitDetails(Map.of("111", 0.0, "222", 0.0, "333", 0.0, "444", 0.0));
 
     // when
-    List<Expense> payments = equalExpenseCalculator.calculateExpensesForGroupExpense(payment);
+    List<Expense> payments = equalExpenseCalculator.calculateExpenses(payment);
 
     // then
     assertThat(payments)
@@ -70,25 +66,23 @@ public class EqualExpenseCalculatorTest {
             tuple("222", BigDecimal.valueOf(-20.0)),
             tuple("333", BigDecimal.valueOf(-20.0)),
             tuple("444", BigDecimal.valueOf(-20.0)),
-            tuple("111", BigDecimal.valueOf(-20.0)))
-        .doesNotContain(tuple("100", BigDecimal.valueOf(80.0)));
+            tuple("111", BigDecimal.valueOf(-20.0)),
+            tuple("100", BigDecimal.valueOf(80.0)));
   }
 
   @Test
-  void testCalculateExpensesForIndividualExpensePaidByIn() {
+  void testCalculateExpensesForIndividualExpensePaidBy_Involved() {
     // given
 
-    Payment payment =
-        Payment.builder()
-            .id("999")
-            .groupId(null)
-            .paidBy("111")
-            .amount(80)
-            .splitDetails(Map.of("111", 0.0, "222", 0.0))
-            .build();
+    Payment payment = new Payment();
+    payment.setId("999");
+    payment.setGroupId(null);
+    payment.setPaidBy("111");
+    payment.setAmount(80);
+    payment.setSplitDetails(Map.of("111", 0.0, "222", 0.0));
 
     // when
-    List<Expense> payments = equalExpenseCalculator.calculateExpensesForGroupExpense(payment);
+    List<Expense> payments = equalExpenseCalculator.calculateExpenses(payment);
 
     // then
     assertThat(payments)
@@ -98,20 +92,18 @@ public class EqualExpenseCalculatorTest {
   }
 
   @Test
-  void testCalculateExpensesForIndividualExpensePaidByOut() {
+  void testCalculateExpensesForIndividualExpensePaidBy_NotInvolved() {
     // given
 
-    Payment payment =
-        Payment.builder()
-            .id("999")
-            .groupId(null)
-            .paidBy("111")
-            .amount(80)
-            .splitDetails(Map.of("222", 80.0))
-            .build();
+    Payment payment = new Payment();
+    payment.setId("999");
+    payment.setGroupId(null);
+    payment.setPaidBy("111");
+    payment.setAmount(80);
+    payment.setSplitDetails(Map.of("222", 80.0));
 
     // when
-    List<Expense> payments = equalExpenseCalculator.calculateExpensesForGroupExpense(payment);
+    List<Expense> payments = equalExpenseCalculator.calculateExpenses(payment);
 
     // then
     assertThat(payments)
@@ -119,5 +111,4 @@ public class EqualExpenseCalculatorTest {
         .extracting(Expense::getUserId, Expense::getAmount)
         .contains(tuple("222", BigDecimal.valueOf(-80.0)), tuple("111", BigDecimal.valueOf(80.0)));
   }
-
 }

@@ -15,7 +15,6 @@ public final class UnEqualExpenseCalculator implements ExpenseCalculator {
   public List<Expense> calculateExpenses(Payment payment) {
     var amount = BigDecimal.valueOf(payment.getAmount());
     var splitDetails = payment.getSplitDetails();
-
     List<Expense> expenses =
         payment.getSplitDetails().entrySet().stream()
             .filter(member -> !member.getKey().equals(payment.getPaidBy()))
@@ -24,14 +23,7 @@ public final class UnEqualExpenseCalculator implements ExpenseCalculator {
                     new Expense(
                         payment, member.getKey(), BigDecimal.valueOf(member.getValue()).negate()))
             .collect(Collectors.toCollection(ArrayList::new));
-
-    expenses.add(
-        new Expense(
-            payment,
-            payment.getPaidBy(),
-            amount.subtract(
-                BigDecimal.valueOf(splitDetails.getOrDefault(payment.getPaidBy(), 0.0)))));
+    expenses.add(new Expense(payment, payment.getPaidBy(), getPayeeAmount(expenses)));
     return expenses;
   }
-
 }

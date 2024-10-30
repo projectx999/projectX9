@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-public final class EqualExpenseCalculator extends ExpenseCalculator {
+public final class EqualExpenseCalculator implements ExpenseCalculator {
 
   private final GroupRepository groupRepository;
 
   @Override
-  protected List<Expense> calculateExpensesForGroupExpense(Payment payment) {
+  public List<Expense> calculateExpenses(Payment payment) {
     var amount = BigDecimal.valueOf(payment.getAmount());
     BigDecimal splitAmount =
         amount.divide(new BigDecimal(payment.getSplitDetails().size()), RoundingMode.HALF_UP);
@@ -27,16 +27,7 @@ public final class EqualExpenseCalculator extends ExpenseCalculator {
             .filter(member -> !member.equals(payment.getPaidBy()))
             .map(member -> new Expense(payment, member, splitAmount.negate()))
             .collect(Collectors.toCollection(ArrayList::new));
-    expenses.add(new Expense(payment, payment.getPaidBy(), amount.subtract(splitAmount)));
+    expenses.add(new Expense(payment, payment.getPaidBy(), getPayeeAmount(expenses)));
     return expenses;
-  }
-
-  @Override
-  protected List<Expense> calculateExpensesForIndividualExpense(Payment payment) {
-    var amount = BigDecimal.valueOf(payment.getAmount());
-    BigDecimal splitAmount = amount.divide(new BigDecimal("2"), RoundingMode.HALF_UP);
-    return List.of(
-        new Expense(payment, payment.getUserId(), splitAmount.negate()),
-        new Expense(payment, payment.getPaidBy(), amount.subtract(splitAmount)));
   }
 }
