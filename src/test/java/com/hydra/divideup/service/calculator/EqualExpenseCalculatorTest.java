@@ -1,123 +1,118 @@
 package com.hydra.divideup.service.calculator;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
 import com.hydra.divideup.entity.Expense;
 import com.hydra.divideup.entity.Payment;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
 @ExtendWith(MockitoExtension.class)
 public class EqualExpenseCalculatorTest {
 
-  @InjectMocks private EqualExpenseCalculator equalExpenseCalculator;
+    @InjectMocks
+    private EqualExpenseCalculator equalExpenseCalculator;
 
-  @Test
-  void testCalculateExpensesForGroupExpensePayByIn() {
-    // given
-    String groupId = "123";
+    @Test
+    void testCalculateExpensesPaidBy_Involved() {
+        // given
+        String groupId = "123";
 
-    Payment payment =
-        Payment.builder()
-            .id("999")
-            .groupId(groupId)
-            .paidBy("111")
-            .amount(80)
-            .splitDetails(Map.of("111", 0.0, "222", 0.0, "333", 0.0, "444", 0.0))
-            .build();
+        Payment payment = new Payment();
+        payment.setId("999");
+        payment.setGroupId(groupId);
+        payment.setPaidBy("111");
+        payment.setAmount(80);
+        payment.setSplitDetails(Map.of("111", 0.0, "222", 0.0, "333", 0.0, "444", 0.0));
 
-    // when
-    List<Expense> payments = equalExpenseCalculator.calculateExpensesForGroupExpense(payment);
 
-    // then
-    assertThat(payments)
-        .hasSize(4)
-        .extracting(Expense::getUserId, Expense::getAmount)
-        .contains(
-            tuple("222", BigDecimal.valueOf(-20.0)),
-            tuple("333", BigDecimal.valueOf(-20.0)),
-            tuple("444", BigDecimal.valueOf(-20.0)),
-            tuple("111", BigDecimal.valueOf(60.0)));
-  }
+        // when
+        List<Expense> payments = equalExpenseCalculator.calculateExpenses(payment);
 
-  @Test
-  void testCalculateExpensesForGroupExpensePayByOut() {
-    String groupId = "123";
+        // then
+        assertThat(payments)
+                .hasSize(4)
+                .extracting(Expense::getUserId, Expense::getAmount)
+                .contains(
+                        tuple("222", BigDecimal.valueOf(-20.0)),
+                        tuple("333", BigDecimal.valueOf(-20.0)),
+                        tuple("444", BigDecimal.valueOf(-20.0)),
+                        tuple("111", BigDecimal.valueOf(60.0)));
+    }
 
-    Payment payment =
-        Payment.builder()
-            .id("999")
-            .groupId(groupId)
-            .paidBy("100")
-            .amount(80)
-            .splitDetails(Map.of("111", 0.0, "222", 0.0, "333", 0.0, "444", 0.0))
-            .build();
+    @Test
+    void testCalculateExpensesPaidBy_NotInvolved() {
+        String groupId = "123";
 
-    // when
-    List<Expense> payments = equalExpenseCalculator.calculateExpensesForGroupExpense(payment);
+        Payment payment = new Payment();
+        payment.setId("999");
+        payment.setGroupId(groupId);
+        payment.setPaidBy("100");
+        payment.setAmount(80);
+        payment.setSplitDetails(Map.of("111", 0.0, "222", 0.0, "333", 0.0, "444", 0.0));
 
-    // then
-    assertThat(payments)
-        .hasSize(5)
-        .extracting(Expense::getUserId, Expense::getAmount)
-        .contains(
-            tuple("222", BigDecimal.valueOf(-20.0)),
-            tuple("333", BigDecimal.valueOf(-20.0)),
-            tuple("444", BigDecimal.valueOf(-20.0)),
-            tuple("111", BigDecimal.valueOf(-20.0)))
-        .doesNotContain(tuple("100", BigDecimal.valueOf(80.0)));
-  }
+        // when
+        List<Expense> payments = equalExpenseCalculator.calculateExpenses(payment);
 
-  @Test
-  void testCalculateExpensesForIndividualExpensePaidByIn() {
-    // given
+        // then
+        assertThat(payments)
+                .hasSize(5)
+                .extracting(Expense::getUserId, Expense::getAmount)
+                .contains(
+                        tuple("222", BigDecimal.valueOf(-20.0)),
+                        tuple("333", BigDecimal.valueOf(-20.0)),
+                        tuple("444", BigDecimal.valueOf(-20.0)),
+                        tuple("111", BigDecimal.valueOf(-20.0)),
+                        tuple("100", BigDecimal.valueOf(80.0)));
+    }
 
-    Payment payment =
-        Payment.builder()
-            .id("999")
-            .groupId(null)
-            .paidBy("111")
-            .amount(80)
-            .splitDetails(Map.of("111", 0.0, "222", 0.0))
-            .build();
+    @Test
+    void testCalculateExpensesForIndividualExpensePaidBy_Involved() {
+        // given
 
-    // when
-    List<Expense> payments = equalExpenseCalculator.calculateExpensesForGroupExpense(payment);
+        Payment payment = new Payment();
+        payment.setId("999");
+        payment.setGroupId(null);
+        payment.setPaidBy("111");
+        payment.setAmount(80);
+        payment.setSplitDetails(Map.of("111", 0.0, "222", 0.0));
 
-    // then
-    assertThat(payments)
-        .hasSize(2)
-        .extracting(Expense::getUserId, Expense::getAmount)
-        .contains(tuple("222", BigDecimal.valueOf(-40.0)), tuple("111", BigDecimal.valueOf(40.0)));
-  }
+        // when
+        List<Expense> payments = equalExpenseCalculator.calculateExpenses(payment);
 
-  @Test
-  void testCalculateExpensesForIndividualExpensePaidByOut() {
-    // given
+        // then
+        assertThat(payments)
+                .hasSize(2)
+                .extracting(Expense::getUserId, Expense::getAmount)
+                .contains(tuple("222", BigDecimal.valueOf(-40.0)), tuple("111", BigDecimal.valueOf(40.0)));
+    }
 
-    Payment payment =
-        Payment.builder()
-            .id("999")
-            .groupId(null)
-            .paidBy("111")
-            .amount(80)
-            .splitDetails(Map.of("222", 80.0))
-            .build();
+    @Test
+    void testCalculateExpensesForIndividualExpensePaidBy_NotInvolved() {
+        // given
 
-    // when
-    List<Expense> payments = equalExpenseCalculator.calculateExpensesForGroupExpense(payment);
+        Payment payment = new Payment();
+        payment.setId("999");
+        payment.setGroupId(null);
+        payment.setPaidBy("111");
+        payment.setAmount(80);
+        payment.setSplitDetails(Map.of("222", 80.0));
 
-    // then
-    assertThat(payments)
-        .hasSize(2)
-        .extracting(Expense::getUserId, Expense::getAmount)
-        .contains(tuple("222", BigDecimal.valueOf(-80.0)), tuple("111", BigDecimal.valueOf(80.0)));
-  }
+        // when
+        List<Expense> payments = equalExpenseCalculator.calculateExpenses(payment);
+
+        // then
+        assertThat(payments)
+                .hasSize(2)
+                .extracting(Expense::getUserId, Expense::getAmount)
+                .contains(tuple("222", BigDecimal.valueOf(-80.0)), tuple("111", BigDecimal.valueOf(80.0)));
+    }
 
 }
