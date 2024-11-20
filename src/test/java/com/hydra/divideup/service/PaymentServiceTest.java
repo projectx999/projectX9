@@ -21,6 +21,8 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -181,5 +183,152 @@ class PaymentServiceTest {
   }
 
 
+  @Test
+  void createPayment_shouldThrowException_whenSplitPercentageValueContainNegative() {
+    // given
+    User user1 = new User();
+    user1.setId("user1");
+
+    User user2 = new User();
+    user2.setId("user2");
+
+    Payment payment = new Payment();
+    payment.setId("payment1");
+    payment.setGroupId("group1");
+    payment.setUserId("user1");
+    payment.setSplitType(SplitType.PERCENTAGE);
+    payment.setSplitDetails(Map.of(
+            "user1", 50.0,
+            "user2", - 50.0 // "user2" has negative percentage
+    ));
+    payment.setAmount(100.0);
+
+    Group group = new Group();
+    group.setId("group1");
+    group.setMembers(Set.of("user1", "user2"));
+    //when
+    when(userService.getUser("user1")).thenReturn(user1);
+    when(userService.getUsers(any())).thenReturn(List.of(user1,user2));
+    when(groupService.getGroup("group1")).thenReturn(group);
+
+    //then
+    IllegalOperationException exception= assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+
+    assertEquals(PAYMENT_SPLIT_DETAILS.getMessage(), exception.getMessage());
+
+    verify(paymentRepository, never()).save(payment);
+    verify(expenseService, never()).createExpense(any());
+  }
+
+  @Test
+  void createPayment_shouldThrowException_whenSplitPercentageValueNotMatchingSum() {
+    // given
+    User user1 = new User();
+    user1.setId("user1");
+
+    User user2 = new User();
+    user2.setId("user2");
+
+    Payment payment = new Payment();
+    payment.setId("payment1");
+    payment.setGroupId("group1");
+    payment.setUserId("user1");
+    payment.setSplitType(SplitType.PERCENTAGE);
+    payment.setSplitDetails(Map.of(
+            "user1", 30.0,
+            "user2", 50.0 // "user2" has negative percentage
+    ));
+    payment.setAmount(100.0);
+
+    Group group = new Group();
+    group.setId("group1");
+    group.setMembers(Set.of("user1", "user2"));
+    //when
+    when(userService.getUser("user1")).thenReturn(user1);
+    when(userService.getUsers(any())).thenReturn(List.of(user1,user2));
+    when(groupService.getGroup("group1")).thenReturn(group);
+
+    //then
+    IllegalOperationException exception= assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+
+    assertEquals(PAYMENT_SPLIT_DETAILS.getMessage(), exception.getMessage());
+
+    verify(paymentRepository, never()).save(payment);
+    verify(expenseService, never()).createExpense(any());
+  }
+
+  @Test
+  void createPayment_shouldThrowException_whenSplitUnequalValueNotMatchingSum() {
+    // given
+    User user1 = new User();
+    user1.setId("user1");
+
+    User user2 = new User();
+    user2.setId("user2");
+
+    Payment payment = new Payment();
+    payment.setId("payment1");
+    payment.setGroupId("group1");
+    payment.setUserId("user1");
+    payment.setSplitType(SplitType.UNEQUAL);
+    payment.setSplitDetails(Map.of(
+            "user1", 30.0,
+            "user2", 80.0 // "user2" has negative percentage
+    ));
+    payment.setAmount(100.0);
+
+    Group group = new Group();
+    group.setId("group1");
+    group.setMembers(Set.of("user1", "user2"));
+    //when
+    when(userService.getUser("user1")).thenReturn(user1);
+    when(userService.getUsers(any())).thenReturn(List.of(user1,user2));
+    when(groupService.getGroup("group1")).thenReturn(group);
+
+    //then
+    IllegalOperationException exception= assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+
+    assertEquals(PAYMENT_SPLIT_DETAILS.getMessage(), exception.getMessage());
+
+    verify(paymentRepository, never()).save(payment);
+    verify(expenseService, never()).createExpense(any());
+  }
+
+  @Test
+  void createPayment_shouldThrowException_whenSplitShareContainNegative() {
+    // given
+    User user1 = new User();
+    user1.setId("user1");
+
+    User user2 = new User();
+    user2.setId("user2");
+
+    Payment payment = new Payment();
+    payment.setId("payment1");
+    payment.setGroupId("group1");
+    payment.setUserId("user1");
+    payment.setSplitType(SplitType.SHARE);
+    payment.setSplitDetails(Map.of(
+            "user1", 2.0,
+            "user2", -3.0 // "user2" has negative share
+    ));
+    payment.setAmount(100.0);
+
+    Group group = new Group();
+    group.setId("group1");
+    group.setMembers(Set.of("user1", "user2"));
+    //when
+    when(userService.getUser("user1")).thenReturn(user1);
+    when(userService.getUsers(any())).thenReturn(List.of(user1,user2));
+    when(groupService.getGroup("group1")).thenReturn(group);
+
+    //then
+    IllegalOperationException exception= assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+
+    assertEquals(PAYMENT_SPLIT_DETAILS.getMessage(), exception.getMessage());
+
+    verify(paymentRepository, never()).save(payment);
+    verify(expenseService, never()).createExpense(any());
+  }
 
 }

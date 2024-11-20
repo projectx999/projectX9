@@ -15,7 +15,7 @@ public class User {
   private String name;
   private String email;
   private String country;
-  private String phoneNumber;
+  private String phone;
 
   @JsonIgnore private String password;
   private String defaultCurrency;
@@ -25,9 +25,9 @@ public class User {
 
   public User() {}
 
-  public User(String email, String phoneNumber, String password) {
+  public User(String email, String phone, String password) {
     this.email = email;
-    this.phoneNumber = phoneNumber;
+    this.phone = phone;
     this.password = password;
   }
 }

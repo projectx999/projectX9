@@ -83,11 +83,16 @@ public class PaymentService {
 
   private void validateSplitPercentage(Map<String, Double> splitDetails) {
     var percentageSum = splitDetails.values().stream().mapToDouble(Double::doubleValue).sum();
+    for(var i : splitDetails.values()){
+      if(i <= 0 || i > 100){
+        throw new IllegalOperationException(PAYMENT_SPLIT_PERCENTAGE_NOT_VALID);
+      }
+    }
     if (percentageSum != 100) {
-      throw new IllegalOperationException(PAYMENT_SPLIT_DETAILS);
+      throw new IllegalOperationException(PAYMENT_SPLIT_PERCENTAGE);
     }
   }
-
+  
   private void validateSplitShare(Map<String, Double> splitDetails) {
     splitDetails.values().stream()
         .filter(v -> v < 0)
