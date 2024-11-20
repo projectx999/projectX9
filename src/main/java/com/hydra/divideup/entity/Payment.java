@@ -35,7 +35,6 @@ public class Payment {
   private Map<String, Double> splitDetails;
 
 
-  public Payment() {}
 
   public Payment(String paidBy, String currency, double amount, SplitType splitType) {
     this.paidBy = paidBy;
