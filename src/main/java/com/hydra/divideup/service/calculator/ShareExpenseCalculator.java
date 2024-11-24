@@ -40,6 +40,6 @@ public final class ShareExpenseCalculator implements ExpenseCalculator {
             .reduce(BigDecimal.ZERO, BigDecimal::add)
             .negate();
     expenses.add(new Expense(payment, payment.getPaidBy(), payerAmount.stripTrailingZeros()));
-    return List.copyOf(expenses);
+    return expenses;
   }
 }
