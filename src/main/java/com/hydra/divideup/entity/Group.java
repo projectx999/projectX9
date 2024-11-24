@@ -4,6 +4,7 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.catalina.Manager;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -21,7 +22,6 @@ public class Group {
   private String groupDescription;
   @NotNull private Set<String> members;
   private String type;
-  private boolean isSettled;
 
   @CreatedBy @NotNull
   private String createdBy; // todo passing from UI will change to logged in user
@@ -29,6 +29,7 @@ public class Group {
   @CreatedDate private String createdTime;
   @LastModifiedBy private String updatedBy;
   @LastModifiedDate private String updatedTime;
+  private Set<String> admin;
 
   public Group() {}
 
