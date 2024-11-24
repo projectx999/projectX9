@@ -120,4 +120,27 @@ public class ShareExpenseCalculatorTest {
                 .extracting(Expense::getUserId, Expense::getAmount)
                 .contains(tuple("222", BigDecimal.valueOf(-100.0).stripTrailingZeros()), tuple("111", BigDecimal.valueOf(100.0).stripTrailingZeros()));
     }
+
+    @Test
+    void testCalculateExpensesForSingleExpensePaidBy_NotInvolved() {
+        // given
+
+        Payment payment =
+                Payment.builder()
+                        .id("999")
+                        .groupId(null)
+                        .paidBy("111")
+                        .amount(100)
+                        .splitDetails(Map.of( "222", 1.0))
+                        .build();
+
+        // when
+        List<Expense> payments = shareExpenseCalculator.calculateExpenses(payment);
+
+        // then
+        assertThat(payments)
+                .hasSize(2)
+                .extracting(Expense::getUserId, Expense::getAmount)
+                .contains(tuple("222", BigDecimal.valueOf(-100.0).stripTrailingZeros()), tuple("111", BigDecimal.valueOf(100.0).stripTrailingZeros()));
+    }
 }
