@@ -24,7 +24,8 @@ public final class PercentageExpenseCalculator implements ExpenseCalculator {
                             .multiply(BigDecimal.valueOf(member.getValue())).negate()))
                     .collect(Collectors.toCollection(ArrayList::new));
 
-    var payeeAmount = expenses.stream().map(Expense::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add).negate();
+    var payeeAmount =
+        expenses.stream().map(Expense::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add).negate();
     expenses.add(new Expense(payment, payment.getPaidBy(), payeeAmount));
     return expenses;
   }
