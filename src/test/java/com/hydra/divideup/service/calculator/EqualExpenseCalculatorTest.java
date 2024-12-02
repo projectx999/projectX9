@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class EqualExpenseCalculatorTest {
+class EqualExpenseCalculatorTest {
 
   @InjectMocks private EqualExpenseCalculator equalExpenseCalculator;
 

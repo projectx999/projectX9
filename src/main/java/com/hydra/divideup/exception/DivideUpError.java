@@ -23,7 +23,6 @@ public enum DivideUpError {
   PAYMENT_VALIDATE_PAID_BY(3008, "Invalid paid by user"),
   PAYMENT_SPLIT_PERCENTAGE_NOT_VALID(
       3009, "Split details should be between 1 and 100 for percentage split type");
-
   private final int code;
   private final String message;
   private final LocalDateTime timestamp;
