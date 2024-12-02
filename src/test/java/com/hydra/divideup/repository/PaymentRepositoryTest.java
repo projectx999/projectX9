@@ -1,6 +1,8 @@
 package com.hydra.divideup.repository;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.hydra.divideup.entity.Payment;
 import java.util.List;
@@ -14,8 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class PaymentRepositoryTest {
 
-  @Autowired
-  private PaymentRepository paymentRepository;
+  @Autowired private PaymentRepository paymentRepository;
 
   @BeforeEach
   public void setUp() {
@@ -26,9 +27,7 @@ class PaymentRepositoryTest {
   void testFindByGroupIdAndIsSettledTrue() {
     // Given
     String groupId = "testGroupId";
-    Payment payment = new Payment();
-    payment.setGroupId(groupId);
-    payment.setSettled(true);
+    Payment payment = Payment.builder().groupId(groupId).settled(true).build();
     paymentRepository.save(payment);
 
     // When
@@ -43,9 +42,7 @@ class PaymentRepositoryTest {
   void testFindByGroupIdAndIsSettledFalse() {
     // Given
     String groupId = "testGroupId";
-    Payment payment = new Payment();
-    payment.setGroupId(groupId);
-    payment.setSettled(false);
+    Payment payment = Payment.builder().groupId(groupId).settled(false).build();
     paymentRepository.save(payment);
 
     // When

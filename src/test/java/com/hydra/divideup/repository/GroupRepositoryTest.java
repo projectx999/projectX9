@@ -15,8 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class GroupRepositoryTest {
 
-  @Autowired
-  private GroupRepository groupRepository;
+  @Autowired private GroupRepository groupRepository;
 
   @BeforeEach
   public void setUp() {
@@ -58,7 +57,5 @@ class GroupRepositoryTest {
 
     // Then
     assertEquals(0, groups.size());
-
   }
-
 }

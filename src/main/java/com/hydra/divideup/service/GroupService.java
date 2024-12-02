@@ -25,7 +25,9 @@ public class GroupService {
   private final Supplier<RecordNotFoundException> groupNotFoundSupplier =
       () -> new RecordNotFoundException(GROUP_NOT_FOUND);
 
-  public GroupService(GroupRepository groupRepository, ExpenseRepository expenseRepository,
+  public GroupService(
+      GroupRepository groupRepository,
+      ExpenseRepository expenseRepository,
       PaymentRepository paymentRepository) {
     this.groupRepository = groupRepository;
     this.expenseRepository = expenseRepository;
@@ -37,25 +39,23 @@ public class GroupService {
   }
 
   public Group getGroup(String id) {
-    return groupRepository.findById(id)
-        .orElseThrow(groupNotFoundSupplier);
+    return groupRepository.findById(id).orElseThrow(groupNotFoundSupplier);
   }
 
   public Group createGroup(Group group) {
+    // Adding created user as member
     group.getMembers().add(group.getCreatedBy());
     return groupRepository.save(group);
   }
 
   public Group updateGroup(String groupId, Group group) {
-    Group existingGroup = groupRepository.findById(groupId)
-        .orElseThrow(groupNotFoundSupplier);
+    Group existingGroup = groupRepository.findById(groupId).orElseThrow(groupNotFoundSupplier);
     group.setId(groupId);
     return groupRepository.save(existingGroup);
   }
 
   public Group deleteGroup(String id) {
-    Group group = groupRepository.findById(id)
-        .orElseThrow(groupNotFoundSupplier);
+    Group group = groupRepository.findById(id).orElseThrow(groupNotFoundSupplier);
     if (haveNoPendingNonSettledExpense(id)) {
       throw new IllegalOperationException(DivideUpError.GROUP_DELETE_UNSETTLE);
     }
@@ -68,6 +68,4 @@ public class GroupService {
     var payments = paymentRepository.findByGroupIdAndSettledTrue(groupId);
     return !(expenses.isEmpty() && payments.isEmpty());
   }
-
-
 }

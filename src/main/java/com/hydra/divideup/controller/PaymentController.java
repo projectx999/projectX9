@@ -23,6 +23,4 @@ public class PaymentController {
   public ResponseEntity<Payment> createPayment(@RequestBody @Valid Payment payment) {
     return ResponseEntity.ok(paymentService.createPayment(payment));
   }
-
-
 }

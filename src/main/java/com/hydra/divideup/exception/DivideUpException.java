@@ -4,15 +4,15 @@ import lombok.Getter;
 
 @Getter
 public class DivideUpException extends RuntimeException {
-  private DivideUpError error;
+  private final DivideUpError error;
+
   public DivideUpException(DivideUpError error) {
     super(error.getMessage());
-    this.error=error;
+    this.error = error;
   }
 
   public DivideUpException(DivideUpError error, Throwable cause) {
     super(error.getMessage(), cause);
-    this.error=error;
+    this.error = error;
   }
-
 }

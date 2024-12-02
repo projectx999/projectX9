@@ -29,7 +29,7 @@ public class GroupController {
     return ResponseEntity.ok(groupService.getGroup(id));
   }
 
-  @GetMapping("users/{userId}")
+  @GetMapping("user/{userId}")
   public ResponseEntity<List<Group>> getGroupsByUser(@PathVariable String userId) {
     return ResponseEntity.ok(groupService.getGroupsByUser(userId));
   }
@@ -40,8 +40,8 @@ public class GroupController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<Group> updateGroup(@PathVariable String id,
-      @RequestBody @Valid Group group) {
+  public ResponseEntity<Group> updateGroup(
+      @PathVariable String id, @RequestBody @Valid Group group) {
     return ResponseEntity.ok(groupService.updateGroup(id, group));
   }
 
@@ -49,5 +49,4 @@ public class GroupController {
   public ResponseEntity<Group> deleteGroup(@PathVariable String id) {
     return ResponseEntity.ok(groupService.deleteGroup(id));
   }
-
 }
