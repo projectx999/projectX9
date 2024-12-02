@@ -2,7 +2,6 @@ package com.hydra.divideup.service;
 
 import static com.hydra.divideup.exception.DivideUpError.*;
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
 import com.hydra.divideup.entity.Payment;
@@ -40,6 +39,12 @@ public class PaymentService {
     if (isNull(payment.getGroupId()) || isNull(payment.getUserId())) {
       throw new IllegalOperationException(PAYMENT_VALIDATE_PAYEE);
     }
+    if (isNull(payment.getSplitType())) {
+      throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+    }
+
+    userService.getUser(payment.getUserId());
+
     if (payment.getAmount() <= 0) {
       throw new IllegalOperationException(PAYMENT_AMOUNT);
     }
@@ -64,16 +69,14 @@ public class PaymentService {
         splitDetails.keySet().stream().filter(Objects::nonNull).collect(Collectors.toSet());
     var users = userService.getUsers(userIds);
     if (users.size() != userIds.size()) {
-      throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+      throw new IllegalOperationException(PAYMENT_SPLIT_DETAILS);
     }
   }
 
   private void validateGroupUsersInSplitDetails(Map<String, Double> splitDetails, String groupId) {
-    if (nonNull(groupId)) {
-      var group = groupService.getGroup(groupId);
-      if (group.getMembers().containsAll(splitDetails.keySet())) {
-        throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
-      }
+    var group = groupService.getGroup(groupId);
+    if (!group.getMembers().containsAll(splitDetails.keySet())) {
+      throw new IllegalOperationException(PAYMENT_SPLIT_DETAILS);
     }
   }
 
@@ -95,14 +98,14 @@ public class PaymentService {
         .findAny()
         .ifPresent(
             v -> {
-              throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+              throw new IllegalOperationException(PAYMENT_SPLIT_DETAILS);
             });
   }
 
   private void validateSplitUnequal(double totalAmount, Map<String, Double> splitDetails) {
     var amountSum = splitDetails.values().stream().mapToDouble(Double::doubleValue).sum();
     if (totalAmount != amountSum) {
-      throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+      throw new IllegalOperationException(PAYMENT_SPLIT_DETAILS);
     }
   }
 }
