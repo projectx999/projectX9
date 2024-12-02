@@ -43,6 +43,7 @@ public class GroupService {
   }
 
   public Group createGroup(Group group) {
+    // Adding created user as member
     group.getMembers().add(group.getCreatedBy());
     return groupRepository.save(group);
   }
