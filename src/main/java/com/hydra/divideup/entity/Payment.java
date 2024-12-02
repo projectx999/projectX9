@@ -14,6 +14,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter
 @Setter
 @Document
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Payment {
 
   private String id;

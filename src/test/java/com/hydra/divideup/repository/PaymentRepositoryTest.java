@@ -1,29 +1,27 @@
 package com.hydra.divideup.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.hydra.divideup.entity.Payment;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @DataMongoTest
 @ActiveProfiles("test")
 class PaymentRepositoryTest {
 
-    @Autowired
-    private PaymentRepository paymentRepository;
+  @Autowired private PaymentRepository paymentRepository;
 
-    @BeforeEach
-    public void setUp() {
-        paymentRepository.deleteAll();
-    }
+  @BeforeEach
+  public void setUp() {
+    paymentRepository.deleteAll();
+  }
 
   @Test
   void testFindByGroupIdAndIsSettledTrue() {
