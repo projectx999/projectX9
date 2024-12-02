@@ -71,7 +71,7 @@ public class EqualExpenseCalculatorTest {
             tuple("333", BigDecimal.valueOf(-20.0)),
             tuple("444", BigDecimal.valueOf(-20.0)),
             tuple("111", BigDecimal.valueOf(-20.0)),
-                tuple("100", BigDecimal.valueOf(80.0)));
+            tuple("100", BigDecimal.valueOf(80.0)));
   }
 
   @Test
@@ -119,5 +119,4 @@ public class EqualExpenseCalculatorTest {
         .extracting(Expense::getUserId, Expense::getAmount)
         .contains(tuple("222", BigDecimal.valueOf(-80.0)), tuple("111", BigDecimal.valueOf(80.0)));
   }
-
 }

@@ -16,7 +16,8 @@
     <description>Digital app for seamlessly allocating expenses and managing debuts</description>
     <properties>
         <java.version>17</java.version>
-        <embed.mongo.version>4.13.1</embed.mongo.version>
+        <embed.mongo.version>4.18.0</embed.mongo.version>
+        <embed.mongo.spring.version>4.11.0</embed.mongo.spring.version>
         <lombok.version>1.18.32</lombok.version>
         <spotless.version>2.43.0</spotless.version>
         <google-java-format.version>1.22.0</google-java-format.version>
@@ -53,6 +54,12 @@
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
             <version>${embed.mongo.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.mongo.spring30x</artifactId>
+            <version>${embed.mongo.spring.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
