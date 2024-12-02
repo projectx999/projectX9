@@ -17,12 +17,9 @@ import com.hydra.divideup.repository.PaymentRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,20 +27,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
 
-  @InjectMocks
-  private PaymentService paymentService;
+  @InjectMocks private PaymentService paymentService;
 
-  @Mock
-  private ExpenseService expenseService;
+  @Mock private ExpenseService expenseService;
 
-  @Mock
-  private PaymentRepository paymentRepository;
- 
-  @Mock
-  private UserService userService;
+  @Mock private PaymentRepository paymentRepository;
 
-  @Mock
-  private GroupService groupService;
+  @Mock private UserService userService;
+
+  @Mock private GroupService groupService;
 
   private Payment payment;
 
@@ -63,7 +55,8 @@ class PaymentServiceTest {
     // given
     payment.setGroupId(null);
     // when & then
-    IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+    IllegalOperationException exception =
+        assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
     assertEquals(PAYMENT_VALIDATE_PAYEE.getMessage(), exception.getMessage());
     verify(paymentRepository, never()).save(payment);
   }
@@ -73,19 +66,21 @@ class PaymentServiceTest {
     // given
     payment.setUserId(null);
     // when & then
-    IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+    IllegalOperationException exception =
+        assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
     assertEquals(PAYMENT_VALIDATE_PAYEE.getMessage(), exception.getMessage());
     verify(paymentRepository, never()).save(payment);
   }
 
   @Test
-  void givenInvalidSplitType_whenCreatedPayment_thenThrowIllegalOperationException(){
-    //given
+  void givenInvalidSplitType_whenCreatedPayment_thenThrowIllegalOperationException() {
+    // given
     payment.setSplitType(null);
-    //then
-    IllegalOperationException exception =assertThrows(IllegalOperationException.class,()->paymentService.createPayment(payment));
-    assertEquals(PAYMENT_SPLIT_TYPE.getMessage(),exception.getMessage());
-    verify(paymentRepository,never()).save(payment);
+    // then
+    IllegalOperationException exception =
+        assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+    assertEquals(PAYMENT_SPLIT_TYPE.getMessage(), exception.getMessage());
+    verify(paymentRepository, never()).save(payment);
   }
 
   @Test
@@ -93,7 +88,8 @@ class PaymentServiceTest {
     // when
     when(userService.getUser("user")).thenThrow(new IllegalOperationException(USER_NOT_FOUND));
     // then
-    IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+    IllegalOperationException exception =
+        assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
     assertEquals(USER_NOT_FOUND.getMessage(), exception.getMessage());
     verify(paymentRepository, never()).save(payment);
   }
@@ -105,7 +101,8 @@ class PaymentServiceTest {
     // when
     when(userService.getUser("user")).thenReturn(new User());
     // then
-    IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+    IllegalOperationException exception =
+        assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
     assertEquals(PAYMENT_AMOUNT.getMessage(), exception.getMessage());
     verify(paymentRepository, never()).save(payment);
   }
@@ -117,7 +114,8 @@ class PaymentServiceTest {
     // when
     when(userService.getUser("user")).thenReturn(new User());
     // then
-    IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+    IllegalOperationException exception =
+        assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
     assertEquals(PAYMENT_AMOUNT.getMessage(), exception.getMessage());
     verify(paymentRepository, never()).save(payment);
   }
@@ -128,7 +126,8 @@ class PaymentServiceTest {
     when(userService.getUser("user")).thenReturn(new User());
     when(userService.getUsers(payment.getSplitDetails().keySet())).thenReturn(List.of(new User()));
     // then
-    IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+    IllegalOperationException exception =
+        assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
     assertEquals(PAYMENT_SPLIT_DETAILS.getMessage(), exception.getMessage());
     verify(paymentRepository, never()).save(payment);
   }
@@ -138,9 +137,9 @@ class PaymentServiceTest {
     // when
     when(userService.getUser("user")).thenReturn(new User());
     when(userService.getUsers(payment.getSplitDetails().keySet())).thenReturn(List.of(new User()));
-    when(groupService.getGroup(payment.getGroupId())).thenReturn(new Group());
     // then
-    IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+    IllegalOperationException exception =
+        assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
     assertEquals(PAYMENT_SPLIT_DETAILS.getMessage(), exception.getMessage());
     verify(paymentRepository, never()).save(payment);
   }
@@ -159,29 +158,30 @@ class PaymentServiceTest {
     payment.setGroupId("group1");
     payment.setUserId("user1");
     payment.setSplitType(SplitType.EQUAL);
-    payment.setSplitDetails(Map.of(
+    payment.setSplitDetails(
+        Map.of(
             "user1", 50.0,
             "userX", 50.0 // "userX" is not in the group
-    ));
+            ));
     payment.setAmount(100.0);
 
     Group group = new Group();
     group.setId("group1");
     group.setMembers(Set.of("user1", "user2")); // Only "user1" and "user2" are valid group members
-    //when
+    // when
     when(userService.getUser("user1")).thenReturn(user1);
-    when(userService.getUsers(any())).thenReturn(List.of(user1,userx));
+    when(userService.getUsers(any())).thenReturn(List.of(user1, userx));
     when(groupService.getGroup("group1")).thenReturn(group);
 
-    //then
-    IllegalOperationException exception= assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+    // then
+    IllegalOperationException exception =
+        assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
 
     assertEquals(PAYMENT_SPLIT_DETAILS.getMessage(), exception.getMessage());
 
     verify(paymentRepository, never()).save(payment);
     verify(expenseService, never()).createExpense(any());
   }
-
 
   @Test
   void createPayment_shouldThrowException_whenSplitPercentageValueContainNegative() {
@@ -191,30 +191,35 @@ class PaymentServiceTest {
 
     User user2 = new User();
     user2.setId("user2");
+    User user3 = new User();
+    user2.setId("user3");
 
     Payment payment = new Payment();
     payment.setId("payment1");
     payment.setGroupId("group1");
     payment.setUserId("user1");
     payment.setSplitType(SplitType.PERCENTAGE);
-    payment.setSplitDetails(Map.of(
+    payment.setSplitDetails(
+        Map.of(
             "user1", 50.0,
-            "user2", - 50.0 // "user2" has negative percentage
-    ));
+            "user3", 50.0,
+            "user2", -50.0 // "user2" has negative percentage
+            ));
     payment.setAmount(100.0);
 
     Group group = new Group();
     group.setId("group1");
-    group.setMembers(Set.of("user1", "user2"));
-    //when
+    group.setMembers(Set.of("user1", "user2", "user3"));
+    // when
     when(userService.getUser("user1")).thenReturn(user1);
-    when(userService.getUsers(any())).thenReturn(List.of(user1,user2));
+    when(userService.getUsers(any())).thenReturn(List.of(user1, user2, user3));
     when(groupService.getGroup("group1")).thenReturn(group);
 
-    //then
-    IllegalOperationException exception= assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+    // then
+    IllegalOperationException exception =
+        assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
 
-    assertEquals(PAYMENT_SPLIT_DETAILS.getMessage(), exception.getMessage());
+    assertEquals(PAYMENT_SPLIT_PERCENTAGE_NOT_VALID.getMessage(), exception.getMessage());
 
     verify(paymentRepository, never()).save(payment);
     verify(expenseService, never()).createExpense(any());
@@ -234,24 +239,25 @@ class PaymentServiceTest {
     payment.setGroupId("group1");
     payment.setUserId("user1");
     payment.setSplitType(SplitType.PERCENTAGE);
-    payment.setSplitDetails(Map.of(
+    payment.setSplitDetails(
+        Map.of(
             "user1", 30.0,
-            "user2", 50.0 // "user2" has negative percentage
-    ));
+            "user2", 50.0));
     payment.setAmount(100.0);
 
     Group group = new Group();
     group.setId("group1");
     group.setMembers(Set.of("user1", "user2"));
-    //when
+    // when
     when(userService.getUser("user1")).thenReturn(user1);
-    when(userService.getUsers(any())).thenReturn(List.of(user1,user2));
+    when(userService.getUsers(any())).thenReturn(List.of(user1, user2));
     when(groupService.getGroup("group1")).thenReturn(group);
 
-    //then
-    IllegalOperationException exception= assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+    // then
+    IllegalOperationException exception =
+        assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
 
-    assertEquals(PAYMENT_SPLIT_DETAILS.getMessage(), exception.getMessage());
+    assertEquals(PAYMENT_SPLIT_PERCENTAGE.getMessage(), exception.getMessage());
 
     verify(paymentRepository, never()).save(payment);
     verify(expenseService, never()).createExpense(any());
@@ -271,22 +277,24 @@ class PaymentServiceTest {
     payment.setGroupId("group1");
     payment.setUserId("user1");
     payment.setSplitType(SplitType.UNEQUAL);
-    payment.setSplitDetails(Map.of(
+    payment.setSplitDetails(
+        Map.of(
             "user1", 30.0,
             "user2", 80.0 // "user2" has negative percentage
-    ));
+            ));
     payment.setAmount(100.0);
 
     Group group = new Group();
     group.setId("group1");
     group.setMembers(Set.of("user1", "user2"));
-    //when
+    // when
     when(userService.getUser("user1")).thenReturn(user1);
-    when(userService.getUsers(any())).thenReturn(List.of(user1,user2));
+    when(userService.getUsers(any())).thenReturn(List.of(user1, user2));
     when(groupService.getGroup("group1")).thenReturn(group);
 
-    //then
-    IllegalOperationException exception= assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+    // then
+    IllegalOperationException exception =
+        assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
 
     assertEquals(PAYMENT_SPLIT_DETAILS.getMessage(), exception.getMessage());
 
@@ -308,27 +316,28 @@ class PaymentServiceTest {
     payment.setGroupId("group1");
     payment.setUserId("user1");
     payment.setSplitType(SplitType.SHARE);
-    payment.setSplitDetails(Map.of(
+    payment.setSplitDetails(
+        Map.of(
             "user1", 2.0,
             "user2", -3.0 // "user2" has negative share
-    ));
+            ));
     payment.setAmount(100.0);
 
     Group group = new Group();
     group.setId("group1");
     group.setMembers(Set.of("user1", "user2"));
-    //when
+    // when
     when(userService.getUser("user1")).thenReturn(user1);
-    when(userService.getUsers(any())).thenReturn(List.of(user1,user2));
+    when(userService.getUsers(any())).thenReturn(List.of(user1, user2));
     when(groupService.getGroup("group1")).thenReturn(group);
 
-    //then
-    IllegalOperationException exception= assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
+    // then
+    IllegalOperationException exception =
+        assertThrows(IllegalOperationException.class, () -> paymentService.createPayment(payment));
 
     assertEquals(PAYMENT_SPLIT_DETAILS.getMessage(), exception.getMessage());
 
     verify(paymentRepository, never()).save(payment);
     verify(expenseService, never()).createExpense(any());
   }
-
 }

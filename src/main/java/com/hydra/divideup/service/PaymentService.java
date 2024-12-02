@@ -8,7 +8,6 @@ import com.hydra.divideup.entity.Payment;
 import com.hydra.divideup.enums.SplitType;
 import com.hydra.divideup.exception.IllegalOperationException;
 import com.hydra.divideup.repository.PaymentRepository;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -40,7 +39,7 @@ public class PaymentService {
     if (isNull(payment.getGroupId()) || isNull(payment.getUserId())) {
       throw new IllegalOperationException(PAYMENT_VALIDATE_PAYEE);
     }
-    if(isNull(payment.getSplitType())){
+    if (isNull(payment.getSplitType())) {
       throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
     }
 
@@ -75,10 +74,10 @@ public class PaymentService {
   }
 
   private void validateGroupUsersInSplitDetails(Map<String, Double> splitDetails, String groupId) {
-      var group = groupService.getGroup(groupId);
-      if (!group.getMembers().containsAll(splitDetails.keySet())) {
-        throw new IllegalOperationException(PAYMENT_SPLIT_DETAILS);
-      }
+    var group = groupService.getGroup(groupId);
+    if (!group.getMembers().containsAll(splitDetails.keySet())) {
+      throw new IllegalOperationException(PAYMENT_SPLIT_DETAILS);
+    }
   }
 
   private void validateSplitPercentage(Map<String, Double> splitDetails) {
@@ -92,7 +91,7 @@ public class PaymentService {
       throw new IllegalOperationException(PAYMENT_SPLIT_PERCENTAGE);
     }
   }
-  
+
   private void validateSplitShare(Map<String, Double> splitDetails) {
     splitDetails.values().stream()
         .filter(v -> v < 0)

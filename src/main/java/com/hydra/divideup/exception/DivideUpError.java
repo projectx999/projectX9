@@ -14,13 +14,15 @@ public enum DivideUpError {
 
   PAYMENT_VALIDATE_PAYEE(3001, "Valid group or user are required"),
   PAYMENT_SPLIT_TYPE(3002, "Invalid split type, unknown or null split type present"),
-  PAYMENT_SPLIT_DETAILS(3003, "Invalid split details, invalid user details present in split details"),
+  PAYMENT_SPLIT_DETAILS(
+      3003, "Invalid split details, invalid user details present in split details"),
   PAYMENT_SPLIT_PERCENTAGE(3004, "Sum of split details should be 100 for percentage split type"),
   PAYMENT_SPLIT_SHARE(3005, "Share value should be positive"),
   PAYMENT_SPLIT_UNEQUAL(3006, "Sum of split details should be equal to amount"),
   PAYMENT_AMOUNT(3007, "Amount should be positive"),
   PAYMENT_VALIDATE_PAID_BY(3008, "Invalid paid by user"),
-  PAYMENT_SPLIT_PERCENTAGE_NOT_VALID(3009, "Split details should be between 1 and 100 for percentage split type");
+  PAYMENT_SPLIT_PERCENTAGE_NOT_VALID(
+      3009, "Split details should be between 1 and 100 for percentage split type");
 
   private final int code;
   private final String message;
