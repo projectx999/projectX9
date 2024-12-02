@@ -19,18 +19,16 @@ class EqualExpenseCalculatorTest {
   @InjectMocks private EqualExpenseCalculator equalExpenseCalculator;
 
   @Test
-  void testCalculateExpensesForGroupExpensePayBy_Involved() {
+  void testCalculateExpensesPaidBy_Involved() {
     // given
     String groupId = "123";
 
-    Payment payment =
-        Payment.builder()
-            .id("999")
-            .groupId(groupId)
-            .paidBy("111")
-            .amount(80)
-            .splitDetails(Map.of("111", 0.0, "222", 0.0, "333", 0.0, "444", 0.0))
-            .build();
+    Payment payment = new Payment();
+    payment.setId("999");
+    payment.setGroupId(groupId);
+    payment.setPaidBy("111");
+    payment.setAmount(80);
+    payment.setSplitDetails(Map.of("111", 0.0, "222", 0.0, "333", 0.0, "444", 0.0));
 
     // when
     List<Expense> payments = equalExpenseCalculator.calculateExpenses(payment);
@@ -47,17 +45,15 @@ class EqualExpenseCalculatorTest {
   }
 
   @Test
-  void testCalculateExpensesForGroupExpensePayBy_NotInvolved() {
+  void testCalculateExpensesPaidBy_NotInvolved() {
     String groupId = "123";
 
-    Payment payment =
-        Payment.builder()
-            .id("999")
-            .groupId(groupId)
-            .paidBy("100")
-            .amount(80)
-            .splitDetails(Map.of("111", 0.0, "222", 0.0, "333", 0.0, "444", 0.0))
-            .build();
+    Payment payment = new Payment();
+    payment.setId("999");
+    payment.setGroupId(groupId);
+    payment.setPaidBy("100");
+    payment.setAmount(80);
+    payment.setSplitDetails(Map.of("111", 0.0, "222", 0.0, "333", 0.0, "444", 0.0));
 
     // when
     List<Expense> payments = equalExpenseCalculator.calculateExpenses(payment);
@@ -78,14 +74,12 @@ class EqualExpenseCalculatorTest {
   void testCalculateExpensesForIndividualExpensePaidBy_Involved() {
     // given
 
-    Payment payment =
-        Payment.builder()
-            .id("999")
-            .groupId(null)
-            .paidBy("111")
-            .amount(80)
-            .splitDetails(Map.of("111", 0.0, "222", 0.0))
-            .build();
+    Payment payment = new Payment();
+    payment.setId("999");
+    payment.setGroupId(null);
+    payment.setPaidBy("111");
+    payment.setAmount(80);
+    payment.setSplitDetails(Map.of("111", 0.0, "222", 0.0));
 
     // when
     List<Expense> payments = equalExpenseCalculator.calculateExpenses(payment);
@@ -101,14 +95,12 @@ class EqualExpenseCalculatorTest {
   void testCalculateExpensesForIndividualExpensePaidBy_NotInvolved() {
     // given
 
-    Payment payment =
-        Payment.builder()
-            .id("999")
-            .groupId(null)
-            .paidBy("111")
-            .amount(80)
-            .splitDetails(Map.of("222", 80.0))
-            .build();
+    Payment payment = new Payment();
+    payment.setId("999");
+    payment.setGroupId(null);
+    payment.setPaidBy("111");
+    payment.setAmount(80);
+    payment.setSplitDetails(Map.of("222", 80.0));
 
     // when
     List<Expense> payments = equalExpenseCalculator.calculateExpenses(payment);
