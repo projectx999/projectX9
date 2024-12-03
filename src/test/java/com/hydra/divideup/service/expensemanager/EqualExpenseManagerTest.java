@@ -1,4 +1,4 @@
-package com.hydra.divideup.service.calculator;
+package com.hydra.divideup.service.expensemanager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -14,9 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class EqualExpenseCalculatorTest {
+class EqualExpenseManagerTest {
 
-  @InjectMocks private EqualExpenseCalculator equalExpenseCalculator;
+  @InjectMocks private EqualExpenseManager equalExpenseCalculator;
 
   @Test
   void testCalculateExpensesPaidBy_Involved() {

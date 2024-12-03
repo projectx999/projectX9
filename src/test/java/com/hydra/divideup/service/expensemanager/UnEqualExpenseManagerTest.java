@@ -1,10 +1,14 @@
-package com.hydra.divideup.service.calculator;
+package com.hydra.divideup.service.expensemanager;
 
+import static com.hydra.divideup.exception.DivideUpError.PAYMENT_SPLIT_DETAILS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.hydra.divideup.entity.Expense;
 import com.hydra.divideup.entity.Payment;
+import com.hydra.divideup.exception.IllegalOperationException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +18,9 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class UnEqualExpenseCalculatorTest {
+class UnEqualExpenseManagerTest {
 
-  @InjectMocks private UnEqualExpenseCalculator unequalExpenseCalculator;
+  @InjectMocks private UnEqualExpenseManager unequalExpenseCalculator;
 
   @Test
   void testCalculateExpensesPaidBy_Involved() {
@@ -136,5 +140,46 @@ public class UnEqualExpenseCalculatorTest {
         .hasSize(2)
         .extracting(Expense::getUserId, Expense::getAmount)
         .contains(tuple("222", BigDecimal.valueOf(-80.0)), tuple("111", BigDecimal.valueOf(80.0)));
+  }
+
+  @Test
+  void testValidate() {
+    // given
+    String groupId = "123";
+
+    Payment payment =
+        Payment.builder()
+            .id("999")
+            .groupId(groupId)
+            .paidBy("111")
+            .amount(80)
+            .splitDetails(Map.of("111", 10.0, "222", 20.0, "333", 25.0, "444", 25.0))
+            .build();
+
+    // when
+    unequalExpenseCalculator.validate(payment);
+  }
+
+  @Test
+  void testValidateForInvalidAmount() {
+    // given
+    String groupId = "123";
+
+    Payment payment =
+        Payment.builder()
+            .id("999")
+            .groupId(groupId)
+            .paidBy("111")
+            .amount(80)
+            .splitDetails(Map.of("111", 10.0, "222", 20.0, "333", 25.0, "444", 25.0))
+            .build();
+
+    // when
+    payment.setAmount(90);
+    // then
+    IllegalOperationException exception =
+        assertThrows(
+            IllegalOperationException.class, () -> unequalExpenseCalculator.validate(payment));
+    assertEquals(PAYMENT_SPLIT_DETAILS.getMessage(), exception.getMessage());
   }
 }

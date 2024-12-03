@@ -4,6 +4,7 @@ import static com.hydra.divideup.exception.DivideUpError.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,8 +13,14 @@ import com.hydra.divideup.entity.Group;
 import com.hydra.divideup.entity.Payment;
 import com.hydra.divideup.entity.User;
 import com.hydra.divideup.enums.SplitType;
+import com.hydra.divideup.exception.DivideUpError;
 import com.hydra.divideup.exception.IllegalOperationException;
 import com.hydra.divideup.repository.PaymentRepository;
+import com.hydra.divideup.service.expensemanager.EqualExpenseManager;
+import com.hydra.divideup.service.expensemanager.ExpenseManagerFactory;
+import com.hydra.divideup.service.expensemanager.PercentageExpenseManager;
+import com.hydra.divideup.service.expensemanager.ShareExpenseManager;
+import com.hydra.divideup.service.expensemanager.UnEqualExpenseManager;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +43,12 @@ class PaymentServiceTest {
   @Mock private UserService userService;
 
   @Mock private GroupService groupService;
+
+  @Mock private ExpenseManagerFactory expenseManagerFactory;
+  @Mock private PercentageExpenseManager percentageExpenseCalculator;
+  @Mock private UnEqualExpenseManager unEqualExpenseCalculator;
+  @Mock private ShareExpenseManager shareExpenseCalculator;
+  @Mock private EqualExpenseManager equalExpenseCalculator;
 
   private Payment payment;
 
@@ -214,6 +227,11 @@ class PaymentServiceTest {
     when(userService.getUser("user1")).thenReturn(user1);
     when(userService.getUsers(any())).thenReturn(List.of(user1, user2, user3));
     when(groupService.getGroup("group1")).thenReturn(group);
+    when(expenseManagerFactory.getExpenseManager(SplitType.PERCENTAGE))
+        .thenReturn(percentageExpenseCalculator);
+    doThrow(new IllegalOperationException(DivideUpError.PAYMENT_SPLIT_PERCENTAGE_NOT_VALID))
+        .when(percentageExpenseCalculator)
+        .validate(payment);
 
     // then
     IllegalOperationException exception =
@@ -252,6 +270,11 @@ class PaymentServiceTest {
     when(userService.getUser("user1")).thenReturn(user1);
     when(userService.getUsers(any())).thenReturn(List.of(user1, user2));
     when(groupService.getGroup("group1")).thenReturn(group);
+    when(expenseManagerFactory.getExpenseManager(SplitType.PERCENTAGE))
+        .thenReturn(percentageExpenseCalculator);
+    doThrow(new IllegalOperationException(DivideUpError.PAYMENT_SPLIT_PERCENTAGE))
+        .when(percentageExpenseCalculator)
+        .validate(payment);
 
     // then
     IllegalOperationException exception =
@@ -291,6 +314,11 @@ class PaymentServiceTest {
     when(userService.getUser("user1")).thenReturn(user1);
     when(userService.getUsers(any())).thenReturn(List.of(user1, user2));
     when(groupService.getGroup("group1")).thenReturn(group);
+    when(expenseManagerFactory.getExpenseManager(SplitType.UNEQUAL))
+        .thenReturn(unEqualExpenseCalculator);
+    doThrow(new IllegalOperationException(DivideUpError.PAYMENT_SPLIT_DETAILS))
+        .when(unEqualExpenseCalculator)
+        .validate(payment);
 
     // then
     IllegalOperationException exception =
@@ -330,6 +358,11 @@ class PaymentServiceTest {
     when(userService.getUser("user1")).thenReturn(user1);
     when(userService.getUsers(any())).thenReturn(List.of(user1, user2));
     when(groupService.getGroup("group1")).thenReturn(group);
+    when(expenseManagerFactory.getExpenseManager(SplitType.SHARE))
+        .thenReturn(shareExpenseCalculator);
+    doThrow(new IllegalOperationException(DivideUpError.PAYMENT_SPLIT_DETAILS))
+        .when(shareExpenseCalculator)
+        .validate(payment);
 
     // then
     IllegalOperationException exception =

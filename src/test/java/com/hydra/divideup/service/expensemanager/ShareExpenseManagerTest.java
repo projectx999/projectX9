@@ -1,10 +1,13 @@
-package com.hydra.divideup.service.calculator;
+package com.hydra.divideup.service.expensemanager;
 
+import static com.hydra.divideup.exception.DivideUpError.PAYMENT_SPLIT_DETAILS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import com.hydra.divideup.entity.Expense;
 import com.hydra.divideup.entity.Payment;
+import com.hydra.divideup.exception.IllegalOperationException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class ShareExpenseCalculatorTest {
+class ShareExpenseManagerTest {
 
-  @InjectMocks ShareExpenseCalculator shareExpenseCalculator;
+  @InjectMocks ShareExpenseManager shareExpenseCalculator;
 
   @Test
   void testCalculateExpensesForGroupExpensePayBy_Involved() {
@@ -147,5 +150,39 @@ class ShareExpenseCalculatorTest {
         .contains(
             tuple("222", BigDecimal.valueOf(-100.0).stripTrailingZeros()),
             tuple("111", BigDecimal.valueOf(100.0).stripTrailingZeros()));
+  }
+
+  @Test
+  void testValidateSplitShareIsNonNegative() {
+    // given
+    Payment payment =
+        Payment.builder()
+            .id("999")
+            .groupId(null)
+            .paidBy("111")
+            .amount(100)
+            .splitDetails(Map.of("222", 1.0, "333", -1.0))
+            .build();
+
+    // then
+    assertThatThrownBy(() -> shareExpenseCalculator.validate(payment))
+        .isInstanceOf(IllegalOperationException.class)
+        .hasMessage(PAYMENT_SPLIT_DETAILS.getMessage());
+  }
+
+  @Test
+  void testValidateSplitShareIsZero() {
+    // given
+    Payment payment =
+        Payment.builder()
+            .id("999")
+            .groupId(null)
+            .paidBy("111")
+            .amount(100)
+            .splitDetails(Map.of("222", 1.0, "333", 0.0))
+            .build();
+
+    // then
+    shareExpenseCalculator.validate(payment);
   }
 }

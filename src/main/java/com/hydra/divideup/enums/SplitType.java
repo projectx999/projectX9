@@ -4,6 +4,5 @@ public enum SplitType {
   EQUAL,
   UNEQUAL,
   PERCENTAGE,
-  SHARE,
-  FULL
+  SHARE
 }
