@@ -29,6 +29,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,7 @@ public class GroupControllerTest {
   private final String groupsUrl = "/api/v1/groups";
 
   @Test
+  @DisplayName("Verify getGroup function for existing group")
   void testGetGroup() throws Exception {
     // given
     final String id = "123";
@@ -73,6 +76,7 @@ public class GroupControllerTest {
   }
 
   @Test
+  @DisplayName("Verify getGroup function for non-existing group")
   void testGetGroup_NotFound() throws Exception {
     final String id = "234";
 
@@ -90,6 +94,7 @@ public class GroupControllerTest {
   }
 
   @Test
+  @DisplayName("Verify getGroupsByUser function for existing user in existing groups")
   void testGetGroupsByUser() throws Exception {
     // given
     final String id1 = "123";
@@ -150,6 +155,7 @@ public class GroupControllerTest {
   }
 
   @Test
+  @DisplayName("Verify getGroupsByUser function for existing user but not present in any groups")
   void testGetGroupsByUser_EmptyGroups() throws Exception {
     // when
     when(groupService.getGroupsByUser("user4")).thenReturn(Collections.emptyList());
@@ -164,6 +170,7 @@ public class GroupControllerTest {
   }
 
   @Test
+  @DisplayName("Verify createGroup function with valid details")
   void testCreateGroup() throws Exception {
     // given
     final String groupId = "234";
@@ -194,6 +201,7 @@ public class GroupControllerTest {
   }
 
   @Test
+  @DisplayName("Verify updateGroup function with valid details and existing group")
   public void testUpdateGroup() throws Exception {
     // given
     final String groupId = "234";
@@ -221,6 +229,7 @@ public class GroupControllerTest {
   }
 
   @Test
+  @DisplayName("Verify updateGroup function with non-existing group")
   public void testUpdateGroup_groupNotFound() throws Exception {
     // given
     final String groupId = "234";
@@ -247,6 +256,7 @@ public class GroupControllerTest {
   }
 
   @Test
+  @DisplayName("Verify deleteGroup function for existing group")
   public void testDeleteGroup() throws Exception {
     // given
     final String groupId = "1";
@@ -268,6 +278,7 @@ public class GroupControllerTest {
   }
 
   @Test
+  @DisplayName("Verify deleteGroup function for existing group, but with unsettled balances")
   public void testDeleteGroup_NotSettledThrowException() throws Exception {
     // given
     final String groupId = "1";
