@@ -1,8 +1,8 @@
-package com.hydra.divideup.service.calculator;
+package com.hydra.divideup.service.expensemanager;
 
 import com.hydra.divideup.entity.Expense;
 import com.hydra.divideup.entity.Payment;
-import com.hydra.divideup.repository.GroupRepository;
+import com.hydra.divideup.exception.DivideUpException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -13,9 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-public final class EqualExpenseCalculator implements ExpenseCalculator {
-
-  private final GroupRepository groupRepository;
+public final class EqualExpenseManager implements ExpenseManager {
 
   @Override
   public List<Expense> calculateExpenses(Payment payment) {
@@ -29,5 +27,10 @@ public final class EqualExpenseCalculator implements ExpenseCalculator {
             .collect(Collectors.toCollection(ArrayList::new));
     expenses.add(new Expense(payment, payment.getPaidBy(), getPayeeAmount(expenses)));
     return expenses;
+  }
+
+  @Override
+  public void validate(Payment payment) throws DivideUpException {
+    // No validation required
   }
 }

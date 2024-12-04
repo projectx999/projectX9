@@ -10,9 +10,4 @@ public class DivideUpException extends RuntimeException {
     super(error.getMessage());
     this.error = error;
   }
-
-  public DivideUpException(DivideUpError error, Throwable cause) {
-    super(error.getMessage(), cause);
-    this.error = error;
-  }
 }
