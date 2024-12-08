@@ -2,13 +2,11 @@ package com.hydra.divideup.service;
 
 import static com.hydra.divideup.exception.DivideUpError.*;
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
 
 import com.hydra.divideup.entity.Payment;
-import com.hydra.divideup.enums.SplitType;
 import com.hydra.divideup.exception.IllegalOperationException;
 import com.hydra.divideup.repository.PaymentRepository;
+import com.hydra.divideup.service.expensemanager.ExpenseManagerFactory;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -28,6 +26,8 @@ public class PaymentService {
 
   private final GroupService groupService;
 
+  private final ExpenseManagerFactory expenseManagerFactory;
+
   @Transactional
   public Payment createPayment(Payment payment) {
     validatePayment(payment);
@@ -40,6 +40,12 @@ public class PaymentService {
     if (isNull(payment.getGroupId()) || isNull(payment.getUserId())) {
       throw new IllegalOperationException(PAYMENT_VALIDATE_PAYEE);
     }
+    if (isNull(payment.getSplitType())) {
+      throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+    }
+
+    userService.getUser(payment.getUserId());
+
     if (payment.getAmount() <= 0) {
       throw new IllegalOperationException(PAYMENT_AMOUNT);
     }
@@ -47,16 +53,9 @@ public class PaymentService {
   }
 
   private void validateSplitDetails(Payment payment) {
-    Map<String, Double> splitDetails = ofNullable(payment.getSplitDetails()).orElseThrow();
-    validateUsersInSplitDetails(splitDetails);
-    validateGroupUsersInSplitDetails(splitDetails, payment.getGroupId());
-    if (payment.getSplitType() == SplitType.PERCENTAGE) {
-      validateSplitPercentage(splitDetails);
-    } else if (payment.getSplitType() == SplitType.SHARE) {
-      validateSplitShare(splitDetails);
-    } else if (payment.getSplitType() == SplitType.UNEQUAL) {
-      validateSplitUnequal(payment.getAmount(), splitDetails);
-    }
+    validateUsersInSplitDetails(payment.getSplitDetails());
+    validateGroupUsersInSplitDetails(payment.getSplitDetails(), payment.getGroupId());
+    expenseManagerFactory.getExpenseManager(payment.getSplitType()).validate(payment);
   }
 
   private void validateUsersInSplitDetails(Map<String, Double> splitDetails) {
@@ -64,45 +63,14 @@ public class PaymentService {
         splitDetails.keySet().stream().filter(Objects::nonNull).collect(Collectors.toSet());
     var users = userService.getUsers(userIds);
     if (users.size() != userIds.size()) {
-      throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+      throw new IllegalOperationException(PAYMENT_SPLIT_DETAILS);
     }
   }
 
   private void validateGroupUsersInSplitDetails(Map<String, Double> splitDetails, String groupId) {
-    if (nonNull(groupId)) {
-      var group = groupService.getGroup(groupId);
-      if (group.getMembers().containsAll(splitDetails.keySet())) {
-        throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
-      }
-    }
-  }
-
-  private void validateSplitPercentage(Map<String, Double> splitDetails) {
-    var percentageSum = splitDetails.values().stream().mapToDouble(Double::doubleValue).sum();
-    for(var i : splitDetails.values()){
-      if(i <= 0 || i > 100){
-        throw new IllegalOperationException(PAYMENT_SPLIT_PERCENTAGE_NOT_VALID);
-      }
-    }
-    if (percentageSum != 100) {
-      throw new IllegalOperationException(PAYMENT_SPLIT_PERCENTAGE);
-    }
-  }
-
-  private void validateSplitShare(Map<String, Double> splitDetails) {
-    splitDetails.values().stream()
-        .filter(v -> v < 0)
-        .findAny()
-        .ifPresent(
-            v -> {
-              throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
-            });
-  }
-
-  private void validateSplitUnequal(double totalAmount, Map<String, Double> splitDetails) {
-    var amountSum = splitDetails.values().stream().mapToDouble(Double::doubleValue).sum();
-    if (totalAmount != amountSum) {
-      throw new IllegalOperationException(PAYMENT_SPLIT_TYPE);
+    var group = groupService.getGroup(groupId);
+    if (!group.getMembers().containsAll(splitDetails.keySet())) {
+      throw new IllegalOperationException(PAYMENT_SPLIT_DETAILS);
     }
   }
 }

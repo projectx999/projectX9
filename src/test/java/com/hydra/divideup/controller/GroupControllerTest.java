@@ -34,18 +34,18 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(
     value = GroupController.class,
     excludeAutoConfiguration = {SecurityAutoConfiguration.class})
-public class GroupControllerTest {
+class GroupControllerTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockBean private GroupService groupService;
+  @MockitoBean private GroupService groupService;
 
   @Autowired ObjectMapper objectMapper;
 
@@ -100,11 +100,11 @@ public class GroupControllerTest {
     Group group2 = new Group("Test Group2", Set.of("user1", "user3"), "user3");
     group2.setId(id2);
 
-    List<Group> user1_groups = List.of(group1, group2);
+    List<Group> user1Groups = List.of(group1, group2);
 
     /*find groups for user1*/
     // when
-    when(groupService.getGroupsByUser("user1")).thenReturn(user1_groups);
+    when(groupService.getGroupsByUser("user1")).thenReturn(user1Groups);
 
     // then
     mockMvc
@@ -128,9 +128,9 @@ public class GroupControllerTest {
     /*find groups for user3*/
     Mockito.reset(groupService);
 
-    List<Group> user2_groups = List.of(group2);
+    List<Group> user2Groups = List.of(group2);
 
-    when(groupService.getGroupsByUser("user3")).thenReturn(user2_groups);
+    when(groupService.getGroupsByUser("user3")).thenReturn(user2Groups);
 
     // then
     mockMvc
@@ -194,7 +194,7 @@ public class GroupControllerTest {
   }
 
   @Test
-  public void testUpdateGroup() throws Exception {
+  void testUpdateGroup() throws Exception {
     // given
     final String groupId = "234";
     Group updatedGroup = new Group("New Group", Set.of("user1", "user2"), "created_user");
@@ -221,7 +221,7 @@ public class GroupControllerTest {
   }
 
   @Test
-  public void testUpdateGroup_groupNotFound() throws Exception {
+  void testUpdateGroup_groupNotFound() throws Exception {
     // given
     final String groupId = "234";
     Group updatedGroup = new Group("New Group", Set.of("user1", "user2"), "created_user");
@@ -247,7 +247,7 @@ public class GroupControllerTest {
   }
 
   @Test
-  public void testDeleteGroup() throws Exception {
+  void testDeleteGroup() throws Exception {
     // given
     final String groupId = "1";
     Group deletedGroup = new Group("Deleted Group", Set.of("user1", "user2"), "created_user");
@@ -268,7 +268,7 @@ public class GroupControllerTest {
   }
 
   @Test
-  public void testDeleteGroup_NotSettledThrowException() throws Exception {
+  void testDeleteGroup_NotSettledThrowException() throws Exception {
     // given
     final String groupId = "1";
     Group deletedGroup = new Group("Deleted Group", Set.of("user1", "user2"), "created_user");

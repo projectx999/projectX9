@@ -3,8 +3,8 @@ package com.hydra.divideup.entity;
 import com.hydra.divideup.enums.SplitType;
 import java.time.LocalDateTime;
 import java.util.Map;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,9 +15,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter
 @Setter
 @Document
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Payment {
 
   private String id;
@@ -31,10 +31,12 @@ public class Payment {
   private String category;
   private String note;
   private boolean settled;
-  @NotNull private SplitType splitType;
+
+  @NotNull(message = "Split details cannot be null")
+  @NotEmpty(message = "At least one split detail is required.")
+  private SplitType splitType;
+
   private Map<String, Double> splitDetails;
-
-
 
   public Payment(String paidBy, String currency, double amount, SplitType splitType) {
     this.paidBy = paidBy;

@@ -4,11 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum SplitType {
-  EQUAL("equalExpenseCalculator"),
-  UNEQUAL("unEqualExpenseCalculator"),
-  PERCENTAGE("percentageExpenseCalculator"),
-  SHARE("shareExpenseCalculator"),
-  FULL("fullExpenseCalculator");
+  EQUAL("equalExpenseManager"),
+  UNEQUAL("unEqualExpenseManager"),
+  PERCENTAGE("percentageExpenseManager"),
+  SHARE("shareExpenseManager");
 
   private final String calculatorName;
 
