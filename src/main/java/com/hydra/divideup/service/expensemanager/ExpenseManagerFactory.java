@@ -10,8 +10,7 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public final class ExpenseManagerFactory {
 
-  @Autowired
-  private ApplicationContext applicationContext;
+  @Autowired private ApplicationContext applicationContext;
 
   public ExpenseManager getExpenseManager(final SplitType splitType) {
     return (ExpenseManager) applicationContext.getBean(splitType.getCalculatorName());

@@ -14,5 +14,4 @@ public enum SplitType {
   SplitType(String calculatorName) {
     this.calculatorName = calculatorName;
   }
-
 }
